@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="ADMIN_CSS/font.css">
+    <link rel="stylesheet" href="ADMIN_CSS/xadmin.css">
+    <link rel="stylesheet" href="ADMIN_CSS/page.css">
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="ADMIN_LIB/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="ADMIN_JS/xadmin.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<style>
+    .dynamic .one span{
+        font-size: 20px;
+        margin-right: 10px;
+    }
+    .dynamic .two{
+        line-height: 30px;
+        padding: 10px 40px;
+    }
+    .dynamic .three{
+        padding: 0 0 10px 40px;
+    }
+</style>
+<body>
+<div class="x-nav">
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
+        <i class="layui-icon" style="line-height:30px">ဂ</i></a>
+</div>
+<div class="x-body layui-anim layui-anim-up">
+    <div class="dynamic">
+        <div class="one">
+            <span>{$detail.username}</span>
+            <img src="{$detail.logo}" alt="" width="30px" height="30px">
+        </div>
+        <div class="two">
+            <p>
+                {$detail.content}
+        </p>
+        </div>
+        <div class="three">
+            {notempty name="$detail.imgs"}
+            {eq name='$detail.type' value='2'}
+            {volist name='$detail.imgs' id='v'}
+            <img src="{$v.url}" alt="" width="80px" height="80px">
+            {/volist}
+            {else/}
+            {volist name='$detail.imgs' id='v'}
+            <video width="320" height="240" controls="controls">
+                <source src="{$v.url}" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+            {/volist}
+            {/eq}
+            {/notempty}
+
+        </div>
+        <div class="three">
+            {notempty name='$detail.voice'}
+            <blockquote class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;">
+                语音：
+            <div class="layui-upload-list" >
+                <!--{if condition = "isset($detail)" }-->
+                <object height="50" width="100" data="{$detail.voice}"></object>
+                <!--{/if}-->
+            </div>
+            </blockquote>
+            {/notempty}
+
+        </div>
+    </div>
+    {notempty name='$detail.comments'}
+    {volist name='$detail.comments' id='v'}
+    <div>
+        <span>{$v.username}</span>回复
+        <span style="color: red;">{$v.c_username}：</span>
+        <p style="line-height: 30px;padding: 10px 35px;">{$v.content}</p>
+    </div>
+    {/volist}
+    {/notempty}
+    <button  class="layui-btn"  lay-submit onclick="return_back()">返回</button>
+</div>
+
+</body>
+</html>
+<script>
+    //返回
+    function return_back() {
+        history.back(-1)
+    }
+</script>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="ADMIN_CSS/font.css">
+    <link rel="stylesheet" href="ADMIN_CSS/xadmin.css">
+    <style>
+        .layui-elem-field {
+            border: none;
+        }
+        .layui-col-xs2 {
+            /*margin-right: 200px;*/
+            width: 32%;
+        }
+        .layui-col-xs2 p{
+            padding: 25px 0px;
+        }
+        /*.layui-carousel .x-admin-carousel .x-admin-backlog{*/
+            /*height: 150px;*/
+        /*}*/
+    </style>
+</head>
+<body>
+<div class="x-body layui-anim layui-anim-up">
+    <blockquote class="layui-elem-quote">欢迎管理员：
+        <span class="x-red">{$mgInfo.name}</span>！当前时间:{$time|date='Y-m-d H:i:s',###}</blockquote>
+    <fieldset class="layui-elem-field">
+        <legend>数据统计</legend>
+        <div class="layui-field-box">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside" lay-arrow="none" style="width: 100%; height: 150px;">
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>平台总收入金额（元）</h2>
+                                            <p><cite>{$total_money / 100}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>总付款次数</h2>
+                                            <p><cite>{$total_order_num}</cite></p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>会员总数</h2>
+                                            <p><cite>{$total_fee_num}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>昨日新增付费会员</h2>
+                                            <p><cite>{$yesterday_fee_num}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>注册未付费用户</h2>
+                                            <p><cite>{$total_free_num}</cite></p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>一级红包个数</h2>
+                                            <p><cite>{$one_level_num}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>已发放一级红包金额（元）</h2>
+                                            <p><cite>{$one_level_send_money / 100}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>待发放一级红包金额（元）</h2>
+                                            <p><cite>{$one_level_wait_money / 100}</cite></p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>二级红包个数</h2>
+                                            <p><cite>{$two_level_num}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>已发放二级红包金额（元）</h2>
+                                            <p><cite>{$two_level_send_money / 100}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>待发放二级红包金额（元）</h2>
+                                            <p><cite>{$two_level_wait_money / 100}</cite></p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>任务语音红包个数</h2>
+                                            <p><cite>{$task_voice_num}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>任务语音红包金额（元）</h2>
+                                            <p><cite>{$task_voice_money / 100}</cite></p>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>随机语音红包个数</h2>
+                                            <p><cite>{$rand_voice_num}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>随机语音红包金额（元）</h2>
+                                            <p><cite>{$rand_voice_money / 100}</cite></p>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>任务总差评数</h2>
+                                            <p><cite>{$total_bad_task}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="#" class="x-admin-backlog-body">
+                                            <h2>未完成任务数</h2>
+                                            <p><cite>{$unfinish_task}</cite></p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</div>
+<script>
+    var _hmt = _hmt || [];
+    (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+</body>
+</html>

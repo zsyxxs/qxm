@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="ADMIN_CSS/font.css">
+    <link rel="stylesheet" href="ADMIN_CSS/xadmin.css">
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="ADMIN_LIB/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="ADMIN_JS/xadmin.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+<div class="x-body">
+    <form class="layui-form" id="add_info" onsubmit="false" action="">
+        <div class="layui-form-item">
+            <label for="name" class="layui-form-label">
+               姓名
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="name" name="name"
+                       autocomplete="off" class="layui-input">
+            </div>
+            <!--<div class="layui-form-mid layui-word-aux">-->
+            <!--<span class="x-red">*</span>将会成为您唯一的登入名-->
+            <!--</div>-->
+        </div>
+        <div class="layui-form-item">
+            <label for="phone" class="layui-form-label">
+                手机号
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="phone" name="phone"
+                       autocomplete="off" class="layui-input" lay-verify="phone">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+               将会成为您唯一的登入名
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="email" class="layui-form-label">
+                邮箱
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="email" name="email"
+                       autocomplete="off" class="layui-input" lay-verify="email">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                可以选填
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">角色</label>
+            <div class="layui-input-block">
+                {volist name='roles' id='v'}
+                <input type="radio" name="role_id" lay-filter="roleId" lay-skin="primary" title="{$v.role_name}" value="{$v.id}" >
+                {/volist}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">上级</label>
+            <div class="layui-input-inline">
+                <select name="p_id" id="parent">
+
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="pwd" class="layui-form-label">
+                密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="password" id="pwd" name="pwd" lay-verify="pass"
+                       autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                6到16个字符
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label  class="layui-form-label">
+            </label>
+            <button  class="layui-btn" lay-filter="add" lay-submit id="submit-btn">增加</button>
+        </div>
+    </form>
+
+</div>
+<script>
+
+    layui.use(['form','layer'], function(){
+        var form = layui.form;
+        //自定义验证规则
+        form.verify({
+            nikename: function(value){
+                if(value.length < 5){
+                    return '昵称至少得5个字符啊';
+                }
+            }
+            ,pass: [/(.+){6,12}$/, '密码必须6到12位']
+            ,repass: function(value){
+                if($('#L_pass').val()!=$('#L_repass').val()){
+                    return '两次密码不一致';
+                }
+            }
+            ,phone: [/^1[3|4|5|7|8]\d{9}$/, '手机号错误']
+            ,email: [/^[a-z0-9._%-]+@([a-z0-9-]+\.)+[a-z]{2,4}$|^1[3|4|5|7|8]\d{9}$/, '邮箱格式不对']
+        });
+
+
+        //监听选中的角色
+        form.on('radio(roleId)', function(data){
+            // console.log(data.value); //被点击的radio的value值
+            var role_id = data.value;
+            $.ajax({
+                url:'getParent',
+                type:'post',
+                data:{'role_id':role_id},
+                dataType:'json',
+                success:function(msg){
+                    // console.log(msg);
+                    var str = '<option>选择上级</option>';
+                    $.each(msg.data,function(i,v){
+                        // console.log(i);
+                        console.log(v);
+                        str += '<option value="'+v.id+'">'+ v.name+'--'+ v.name+'</option>';
+                    })
+                    console.log(str);
+                    $('#parent').html(str);
+
+                    layui.use('form', function(){  //此段代码必不可少
+                        var form = layui.form;
+                        form.render();
+                    });
+                    // $('#parent').append(str);
+                }
+            });
+
+        });
+
+        //监听提交
+        form.on('submit(add)', function(data){
+            // console.log(data.field);
+            var shuju = data.field;
+            $.post({
+                url:'add',
+                type:'post',
+                data:{'data':shuju},
+                success:function (msg) {
+                    layer.alert(msg.status, {icon: 6},function () {
+                        // 获得frame索引
+                        var index = parent.layer.getFrameIndex(window.name);
+                        //关闭当前frame
+                        parent.layer.close(index);
+                        window.parent.location.reload();
+                    });
+                }
+            });
+            return false;
+        });
+
+
+    });
+</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+</body>
+
+</html>

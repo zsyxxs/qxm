@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="renderer" content="webkit">
+    <title></title>
+    <link rel="stylesheet" href="ADMIN_CSS/pintuer.css">
+    <link rel="stylesheet" href="ADMIN_CSS/admin.css">
+    <script src="ADMIN_JS/jquery.js"></script>
+    <script src="ADMIN_JS/pintuer.js"></script>
+</head>
+<body>
+<form method="post" action="" id="listform">
+    <div class="panel admin-panel">
+        <div class="padding border-bottom">
+            <ul class="search" style="padding-left:10px;">
+                <li> <a class="button border-main icon-plus-square-o" href="{:url('index')}"> 返回</a> </li>
+            </ul>
+        </div>
+        <div class="panel-head"><strong class="icon-reorder"> 正在给<span style="color: #0000FF;font-size: 20px;">【{$roleinfo['role_name']}】</span>分配权限</strong> <a href="" style="float:right; display:none;">添加字段</a></div>
+        <div>
+            {volist name='authinfoA' id='v'}
+            <div style="padding: 10px 30px;">
+                {in name="v.id" value="$roleinfo['auth_ids']"}
+                <h3><input type="checkbox" value="{$v.id}" name="auth_id[]" checked="checked">{$v.auth_name}</h3>
+                {else/}
+                <h3><input type="checkbox" value="{$v.id}" name="auth_id[]" >{$v.auth_name}</h3>
+                {/in}
+                <ul>
+                    {volist name='authinfoB' id='vv'}
+                    {if($vv['p_id'] === $v['id'])}
+                    {in name="vv.id" value="$roleinfo['auth_ids']"}
+                    <li style="padding: 5px 25px;"><input type="checkbox" value="{$vv.id}" name="auth_id[]" checked="checked">{$vv.auth_name}</li>
+                    {else/}
+                    <li style="padding: 5px 25px;"><input type="checkbox" value="{$vv.id}" name="auth_id[]">{$vv.auth_name}</li>
+                    {/in}
+                    {/if}
+                    {/volist}
+                </ul>
+            </div>
+            {/volist}
+
+        </div>
+
+    </div>
+    <div class="form-group">
+        <div class="label">
+            <label></label>
+        </div>
+        <div class="field">
+            <button class="button bg-main icon-check-square-o" type="submit"> 提交</button>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    //搜索
+    function changesearch(){
+
+    }
+
+    //单个删除
+    function del(id,mid,iscid){
+        if(confirm("您确定要删除吗?")){
+
+        }
+    }
+
+    //全选
+    $("#checkall").click(function(){
+        $("input[name='id[]']").each(function(){
+            if (this.checked) {
+                this.checked = false;
+            }
+            else {
+                this.checked = true;
+            }
+        });
+    })
+
+    //批量删除
+    function DelSelect(){
+        var Checkbox=false;
+        $("input[name='id[]']").each(function(){
+            if (this.checked==true) {
+                Checkbox=true;
+            }
+        });
+        if (Checkbox){
+            var t=confirm("您确认要删除选中的内容吗？");
+            if (t==false) return false;
+            $("#listform").submit();
+        }
+        else{
+            alert("请选择您要删除的内容!");
+            return false;
+        }
+    }
+
+    //批量排序
+    function sorts(){
+        var Checkbox=false;
+        $("input[name='id[]']").each(function(){
+            if (this.checked==true) {
+                Checkbox=true;
+            }
+        });
+        if (Checkbox){
+
+            $("#listform").submit();
+        }
+        else{
+            alert("请选择要操作的内容!");
+            return false;
+        }
+    }
+
+
+    //批量首页显示
+    function changeishome(o){
+        var Checkbox=false;
+        $("input[name='id[]']").each(function(){
+            if (this.checked==true) {
+                Checkbox=true;
+            }
+        });
+        if (Checkbox){
+
+            $("#listform").submit();
+        }
+        else{
+            alert("请选择要操作的内容!");
+
+            return false;
+        }
+    }
+
+    //批量推荐
+    function changeisvouch(o){
+        var Checkbox=false;
+        $("input[name='id[]']").each(function(){
+            if (this.checked==true) {
+                Checkbox=true;
+            }
+        });
+        if (Checkbox){
+
+
+            $("#listform").submit();
+        }
+        else{
+            alert("请选择要操作的内容!");
+
+            return false;
+        }
+    }
+
+    //批量置顶
+    function changeistop(o){
+        var Checkbox=false;
+        $("input[name='id[]']").each(function(){
+            if (this.checked==true) {
+                Checkbox=true;
+            }
+        });
+        if (Checkbox){
+
+            $("#listform").submit();
+        }
+        else{
+            alert("请选择要操作的内容!");
+
+            return false;
+        }
+    }
+
+
+    //批量移动
+    function changecate(o){
+        var Checkbox=false;
+        $("input[name='id[]']").each(function(){
+            if (this.checked==true) {
+                Checkbox=true;
+            }
+        });
+        if (Checkbox){
+
+            $("#listform").submit();
+        }
+        else{
+            alert("请选择要操作的内容!");
+
+            return false;
+        }
+    }
+
+    //批量复制
+    function changecopy(o){
+        var Checkbox=false;
+        $("input[name='id[]']").each(function(){
+            if (this.checked==true) {
+                Checkbox=true;
+            }
+        });
+        if (Checkbox){
+            var i = 0;
+            $("input[name='id[]']").each(function(){
+                if (this.checked==true) {
+                    i++;
+                }
+            });
+            if(i>1){
+                alert("只能选择一条信息!");
+                $(o).find("option:first").prop("selected","selected");
+            }else{
+
+                $("#listform").submit();
+            }
+        }
+        else{
+            alert("请选择要复制的内容!");
+            $(o).find("option:first").prop("selected","selected");
+            return false;
+        }
+    }
+
+</script>
+</body>
+</html>

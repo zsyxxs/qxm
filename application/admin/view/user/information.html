@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="ADMIN_CSS/font.css">
+    <link rel="stylesheet" href="ADMIN_CSS/xadmin.css">
+    <link rel="stylesheet" href="ADMIN_CSS/page.css">
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="ADMIN_LIB/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="ADMIN_JS/xadmin.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="x-body layui-anim layui-anim-up">
+    <blockquote class="layui-elem-quote">
+        <span class="x-red">{$userInfo.username}</span>
+        用户详细信息：
+    </blockquote>
+
+    <fieldset class="layui-elem-field">
+        <legend>基本信息</legend>
+        <div class="layui-field-box">
+            <table class="layui-table">
+                <tbody>
+                <tr>
+                    <th>姓名</th>
+                    <td>{$userInfo.username}</td>
+                </tr>
+                <tr>
+                    <th>账户余额</th>
+                    <td>{$userInfo.money / 100}</td>
+                </tr>
+                <tr>
+                    <th>手机号</th>
+                    <td>{$userInfo.mobile}</td></tr>
+                <tr>
+                    <th>openid</th>
+                    <td>{$userInfo.openid}</td></tr>
+                <tr>
+                    <th>性别</th>
+                    <td>
+                        {if condition="($userInfo.sex == 1)"}
+                        女
+                        {elseif condition="($userInfo.sex ==2)"}
+                        男
+                        {/if}
+                    </td></tr>
+                <tr>
+                    <th>年纪</th>
+                    <td>{$userInfo.age}</td></tr>
+                <tr>
+                    <th>等级</th>
+                    <td>{$userInfo.level}</td></tr>
+                <tr>
+                    <th>上级</th>
+                    <td>{$parentInfo.username}</td></tr>
+                <tr>
+                    <th>邀请码</th>
+                    <td>{$userInfo.code}</td></tr>
+                <tr>
+                    <th>上级邀请码</th>
+                    <td>{$userInfo.invite_code}</td></tr>
+                <tr>
+                    <th>一级下线数量</th>
+                    <td>{$userInfo.level_one}</td></tr>
+                <tr>
+                    <th>二级下线数量</th>
+                    <td>{$userInfo.level_two}</td></tr>
+                <tr>
+                    <th>自身标签</th>
+                    <td>
+                        {volist name='$user_flag' id='v'}
+                        {$v.title},
+                        {/volist}
+
+                    </td></tr>
+                <tr>
+                    <th>他的标签</th>
+                    <td>
+                        {volist name='$like_flag' id='v'}
+                        {$v.title},
+                        {/volist}
+
+                    </td></tr>
+
+                </tbody>
+            </table>
+        </div>
+    </fieldset>
+    <button  class="layui-btn"  lay-submit onclick="return_back()">返回</button>
+</div>
+
+</body>
+</html>
+<script>
+    //返回
+    function return_back() {
+        history.back(-1)
+    }
+</script>
