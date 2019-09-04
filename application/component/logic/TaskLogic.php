@@ -465,7 +465,10 @@ class TaskLogic  extends BaseLogic
                     'cate' => 1,
                 ];
                 $res = (new DynamicLogic())->save($data);
-
+                //给用户发送模板消息
+                $url = '';
+                $appid = config('wxUrl.appid');
+                $res = (new TemplateLogic())->sendDynamicTemplate($taskInfo['uid'],$url,$appid,$uid,$id);
             }
             Db::commit();
             return ApiReturn::success('点赞成功');

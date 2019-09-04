@@ -242,7 +242,7 @@ return [
 
     'webUrl' => [
 //        'baseUrl' => 'http://mingpian.8raw.com',
-//        'apiUrl'  => 'http://qxmapi.qxmiao.com',
+        'h5Url'  => 'http://h5.raydonet.com',
         'apiUrl'  => 'http://h52.raydonet.com'
     ],
 

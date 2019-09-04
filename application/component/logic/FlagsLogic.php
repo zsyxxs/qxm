@@ -383,20 +383,33 @@ class FlagsLogic  extends BaseLogic
             'u.status' => 1,
             'u.id' => array('neq',$uid),
         ];
-        $query = Db::table('flags')->alias('f')
-            ->join('flag_user fu','f.id=fu.f_id')
+        $query = Db::table('flag_user')->alias('fu')
+            ->join('flags f','f.id=fu.f_id')
             ->join('user u','fu.uid=u.id')
             ->where($map)
 //            ->where('f.title','like',"%$title%")
 //            ->where('u.status',1)
             ->order('fu.num asc,u.num asc,fu.update_time desc')
-            ->field('u.id,u.username,u.logo,u.flag_user,u.city,u.province,u.status');
+            ->field('u.id,u.username,u.logo,u.flag_user,u.city,u.province,u.status,u.level,f.title');
         if(!empty($where)){
             $query->where($where);
         }
            $query = $query ->limit($offset,$pagesize)->select();
+        $list = [];
+        foreach ($query as $k=>$v){
+            $list[$k] = $v;
+//            dump($list[$k]);
+            $flags_arr = explode(',',$v['flag_user']);
+            $title = [];
+            foreach ($flags_arr as $kk => $vv){
+                $flagInfo = (new FlagsLogic())->getInfo(['id'=>$vv],false,'title');
+                array_push($title,$flagInfo['title']);
+            }
+            $list[$k]['flag_title'] = $title;
 
-        return ApiReturn::success('success',$query);
+        }
+
+        return ApiReturn::success('success',$list);
 
     }
 

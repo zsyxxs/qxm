@@ -12,8 +12,11 @@ use app\api\helper\ApiReturn;
 use app\component\interfaces\weixin\api\WxresultApi;
 use app\component\interfaces\wxpay\api\WxpayresultApi;
 use app\component\logic\BaseLogic;
+use app\component\logic\FlagsLogic;
 use app\component\logic\ManagerLogic;
 use app\component\logic\OrderLogic;
+use app\component\logic\TaskLogic;
+use app\component\logic\TemplateLogic;
 use app\component\logic\UserLogic;
 use think\Db;
 use Endroid\QrCode\QrCode;
@@ -118,43 +121,19 @@ class WeixinApi extends BaseApi
 
     public function sendTemplate()
     {
-        $uid = $this->_param('uid',23);
-        $keyword = $this->_param('keyword','消息模板');
-        $userInfo = (new UserLogic())->getInfo(['id' => $uid],false,'id,username,openid,unionid');
+        $type = $this->_param('type','1');
+        //1：选择完标签给上级发送
+        //2：任务点赞发布语音动态
+        $uid = $this->_param('uid',27);
+        $url = $this->_param('url','http://h5.raydonet.com');
+        $appid = config('wxUrl.appid');
 
-        $data = [
-            'touser' => $userInfo['openid'],
-            'template_id' => '',
-            'url' => 'http://h5.raydonet.com',
-            'appid' => 'wxfa1eaab45bcd6ab0',
-//            'pagepath' => '',
-            'data' => [
-                "first" => [
-                    'value' => $keyword,
-                    'color' => '#173177'
-                ],
-                'keyword1' => [
-                    'value' => '巧克力',
-                    "color" => "#173177"
-                ],
-                'keyword2' => [
-                    'value' => '39.8元',
-                    "color" => "#173177"
-                ],
-                'keyword3' => [
-                    'value' => '2014年9月22日',
-                    "color" => "#173177"
-                ],
-                'remark' => [
-                    'value' => '欢迎再次购买',
-                    "color" => "#173177"
-                ],
-            ]
+       if($type == 1){
+           $res = (new TemplateLogic())->sendTaskTemplate($uid,$url,$appid);
+           return $res;
+       }
 
 
-        ];
-        $res = (new WxresultApi())->sendTemplate($data);
-        return $res;
     }
 
 
@@ -172,26 +151,34 @@ class WeixinApi extends BaseApi
         return $res;
     }
 
-    public function create_qrcode()
-    {
-//        dump(__DIR__);die;
-        require __DIR__.'/../../../vendor/autoload.php';
+
+    /**
+     * 生成自定义二维码
+     * @return array
+     */
+    public function create_qrcode(){
+        $uid = $this->_param('uid','3');
+        $url = $this->_param('url',config('webUrl.h5Url'));
 
 
+        $user = (new UserLogic())->getInfo(['id'=>$uid],false,'id,logo');
+        $logo = $user['logo'];
+        if(empty($logo)){
+            return ApiReturn::error('信息错误请重试');
+        }
+//        $logo="http://thirdwx.qlogo.cn/mmopen/vi_32/kRcWHa8384Y6CTuHp8UTor5ibGUefvSUicmlv9iajS4Hp16vYAb8DzQcZMKQaQo2sZxhXpacibJq87VxW0ib444yPkw/132";
+        //移动文件到框架应用更目录的public/uploads/
+        //二维码URL参数
+        $size = 20;
+        $filename=code($url,$logo,$size);
 
-        $qrCode = new QrCode('https://www.baidu.com/');
-        $qrCode->setSize(150);
-        $qrCode->setMargin(10);
-        $path = __DIR__ . '/../../../public/1.png';
+        //上传到阿里云
+        $url = (new OssApi())->upload($filename,$filename);
+        return ApiReturn::success('success',$url['info']['url']);
 
-        $res = $qrCode->setLogoPath(__DIR__ . '/../../../public/uploads/logo.png');
-        $qrCode->setLogoSize(40, 40);
-        dump($res);
 
-        header('Content-Type: ' . $qrCode->getContentType());
-//
-        echo $qrCode->writeString();
     }
+
 
 
 

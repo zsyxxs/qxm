@@ -29,8 +29,8 @@ class WxAuth extends Controller
         $this->appId = 'wxfa1eaab45bcd6ab0';
         $this->appsecret = '24a8940db49a5494c170519f40d3ffb2';
 //        $this->redirectUri = 'http://qxmapi.qxmiao.com/auth_api/login';
-//        $this->redirectUri = 'http://h5.qxmiao.com';
-        $this->redirectUri = 'http://h5.raydonet.com';
+        $this->redirectUri = 'http://h5.qxmiao.com';
+//        $this->redirectUri = 'http://h5.raydonet.com';
         $this->responseType = 'code';
         $this->scope = 'snsapi_userinfo';
         $this->state = 'STATE#wechat_redirect';
