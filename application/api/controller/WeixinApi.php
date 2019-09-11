@@ -56,6 +56,9 @@ class WeixinApi extends BaseApi
 //        $openid = 'oaVObwpW2Y2KJMCjLvHHKgW4HSHI';
 //        $order_num = '14qxm0R1JWj20190802105633';
 //        $body = '测试支付';
+//        if($total_fee < 39900){
+//            return ApiReturn::error('金额错误');
+//        }
         //判断订单是否存在
         $orderInfo = (new OrderLogic())->getInfo(['order_num'=>$order_num]);
         if(empty($orderInfo)){
@@ -169,8 +172,7 @@ class WeixinApi extends BaseApi
 //        $logo="http://thirdwx.qlogo.cn/mmopen/vi_32/kRcWHa8384Y6CTuHp8UTor5ibGUefvSUicmlv9iajS4Hp16vYAb8DzQcZMKQaQo2sZxhXpacibJq87VxW0ib444yPkw/132";
         //移动文件到框架应用更目录的public/uploads/
         //二维码URL参数
-        $size = 20;
-        $filename=code($url,$logo,$size);
+        $filename=code($url);
 
         //上传到阿里云
         $url = (new OssApi())->upload($filename,$filename);

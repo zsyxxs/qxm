@@ -175,7 +175,10 @@ class FlagsLogic  extends BaseLogic
      */
     public function flag_list_one()
     {
-        $list = Db::table('flags')->where(['level'=>1,'status' => 1,'type'=>0])->select();
+        $list = Db::table('flags')
+            ->where(['level'=>1,'status' => 1,'type'=>0])
+            ->order('sort deac , create_time asc')
+            ->select();
         return ApiReturn::success('success',$list);
     }
 
@@ -264,7 +267,7 @@ class FlagsLogic  extends BaseLogic
                     (new FlagUserLogic())->save(['uid' => $uid,'f_id' => $v,'sex' => $user_sex]);
                 }
                 //判断是否为免费用户，不生成任务
-                if($userInfo['invite_code'] != 'yanzhijun77'){
+                if($userInfo['invite_code'] != 'Mrtengda'){
                     //根据用户选择标签，生成匹配任务
                     $res = (new TaskLogic())->create_task($userInfo,$flag_users,$flag_likes,1);
 //                    $res = (new TaskLogic())->create_task($uid,$flag_users,$flag_likes,1);
@@ -283,11 +286,11 @@ class FlagsLogic  extends BaseLogic
                     (new FlagUserLogic())->save(['uid' => $uid,'f_id' => $v,'sex' => $user_sex]);
                 }
                 //判断是否为免费用户，不生成任务
-                if($userInfo['invite_code'] != 'yanzhijun77'){
-                    //根据用户选择标签，生成匹配任务
-                    $res = (new TaskLogic())->create_task($userInfo,$flag_users,$flag_likes,1);
-//                    $res = (new TaskLogic())->create_task($uid,$flag_users,$flag_likes,1);
-                }
+//                if($userInfo['invite_code'] != 'Mrtengda'){
+//                    //根据用户选择标签，生成匹配任务
+//                    $res = (new TaskLogic())->create_task($userInfo,$flag_users,$flag_likes,1);
+////                    $res = (new TaskLogic())->create_task($uid,$flag_users,$flag_likes,1);
+//                }
 
             }else{
                 //判断此次选择的标签与之前的是否有重复
@@ -361,6 +364,7 @@ class FlagsLogic  extends BaseLogic
             return $res;
         }
         $title = $data['title'];
+        $title = urldecode($title);
         $uid= $data['uid'];
         $pageNo = $data['pageNo'];
         $pagesize = $data['pagesize'];
@@ -372,11 +376,11 @@ class FlagsLogic  extends BaseLogic
 //            return ApiReturn::error('等级太低');
 //        }
         $where = [];
-        if($userInfo['level'] == 6){
-            if(!empty($userInfo['city'])){
-                $where = ['u.city' => $userInfo['city']];
-            }
-        }
+//        if($userInfo['level'] == 6){
+//            if(!empty($userInfo['city'])){
+//                $where = ['u.city' => $userInfo['city']];
+//            }
+//        }
 
         $map = [
             'f.title' => array('like',"%$title%"),
@@ -394,6 +398,7 @@ class FlagsLogic  extends BaseLogic
         if(!empty($where)){
             $query->where($where);
         }
+
            $query = $query ->limit($offset,$pagesize)->select();
         $list = [];
         foreach ($query as $k=>$v){
@@ -408,7 +413,6 @@ class FlagsLogic  extends BaseLogic
             $list[$k]['flag_title'] = $title;
 
         }
-
         return ApiReturn::success('success',$list);
 
     }

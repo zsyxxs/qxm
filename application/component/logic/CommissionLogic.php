@@ -39,8 +39,10 @@ class CommissionLogic  extends BaseLogic
             'uid' => $data['uid']
         ];
         $order = 'update_time desc';
-        $field = 'id,uid,money,level,status,create_time,update_time';
+        $field = 'c.id,c.uid,c.money,c.level,c.status,c.create_time,c.update_time,u.username,u.logo';
         $query = Db::table('commission')
+            ->alias("c")
+            ->join('user u', 'u.id=c.q_uid','left')
             ->where($map)
             ->order($order)
             ->field($field);

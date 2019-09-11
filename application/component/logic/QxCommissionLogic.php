@@ -38,14 +38,17 @@ class QxCommissionLogic  extends BaseLogic
         $map = [
             'uid' => $data['uid']
         ];
-        $order = 'id desc';
-        $field = 'id,uid,money,status,create_time,update_time';
+        $order = 'c.id desc';
+        $field = 'c.id,c.uid,c.money,c.status,c.create_time,c.update_time,u.username,u.logo';
         $query = Db::table('qx_commission')
+            ->alias("c")
+            ->join('user u', 'u.id=c.q_uid','left')
             ->where($map)
             ->order($order)
             ->field($field);
         $offset = $this->getOffset($data['pageNo'],$data['pagesize']);
         $list = $query->limit($offset,$data['pagesize'])->select();
+
 //        $list = (new QxCommissionLogic())->queryPage($map,$order,$field,$data['pageNo'],$data['pagesize']);
         return ApiReturn::success('success',$list);
     }

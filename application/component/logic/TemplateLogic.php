@@ -83,7 +83,36 @@ class TemplateLogic  extends BaseLogic
         return $res;
     }
 
-    public function getData($openid,$template_id,$url,$appid,$first,$keyword1,$keyword2,$keyword3,$keyword4)
+    /**
+     * 给游客发送模板消息
+     * @param $a_uid
+     * @param $url
+     * @param $appid
+     * @param $username
+     * @param $parentname
+     * @param $types 默认1 语音 2 文字
+     * @return array
+     */
+    public function sendAssessTemplate($a_uid,$url,$appid,$username,$parentname,$types=1)
+    {
+        $first = '现在有人想认识你哦';
+        $template_id = 'H_Aa7eIwfPPf9U4Fqu_phq4cbOk89EEKYSx-frBsDuQ';
+
+        $description = '进入主页点击围观，认真听完TA的自我介绍，可点赞或灭灯哦';
+
+        //游客
+        $userInfo = (new UserLogic())->getInfo(['id' => $a_uid],false,'id,username,p_id,openid,unionid,flag_like');
+
+        $keyword1 = $username.'的自我介绍';
+//        $keyword2 = '牵线喵语音自我介绍培训班';
+//        $keyword3 = $parentname;
+
+
+        $res = $this->getData($userInfo['openid'],$template_id,$url,$appid,$first,$keyword1,$description);
+        return $res;
+    }
+
+    public function getData($openid,$template_id,$url,$appid,$first = '',$keyword1 = '',$keyword2 = '',$keyword3 = '',$keyword4 = '')
     {
         $data = [
             'touser' => $openid,

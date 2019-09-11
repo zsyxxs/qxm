@@ -47,14 +47,14 @@ class CashLogic  extends BaseLogic
         $total_cash = $qx_cash + $task_cash + $voice_cash;
 
         //已提现总额
-        $withdraw = (new CashLogic())->sum(['uid' => $uid,'status' => 2],'money');
+        $withdraw = (new CashLogic())->sum(['uid' => $uid,'status' => 1],'money');
 
         //总的余额
         $res = (new UserLogic())->getInfo(['id'=>$uid]);
         //获取该用户申请的提现总额
         $result = (new CashLogic())->getSumByuid($uid);
         //可提现总金额
-        $allow_cash = $res['money']  - $result ;
+        $allow_cash = $total_cash  - $result ;
 
         $shuju = [
             'total_cash' => $total_cash,    //总收入
@@ -110,7 +110,7 @@ class CashLogic  extends BaseLogic
                 return ApiReturn::error('提现金额必须为整数');
             }
             //判断提现金额是否大于最小提现金额1元
-            if($money < 100){
+            if($money < 1000){
                 return ApiReturn::error('提现金额不能小于最低提现标准');
             }
 

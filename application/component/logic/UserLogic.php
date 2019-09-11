@@ -138,6 +138,24 @@ class UserLogic   extends BaseLogic
 
     }
 
+    public function getUserInfoByUnionid($data)
+    {
+        $field = ['unionid'];
+        $res = $this->checkFields($field,$data);
+        if($res !== ENABLE){
+            return $res;
+        }
+        $map = [
+            'unionid' => $data['unionid']
+        ];
+        $userInfo = $this->getInfo($map);
+        if(empty($userInfo)){
+            return ApiReturn::error('用户名信息不存在');
+        }
+        //用户信息存在
+        return ApiReturn::success('登录成功',$userInfo);
+    }
+
 
     /**
      * 绑定邀请码
@@ -254,11 +272,11 @@ class UserLogic   extends BaseLogic
             if($res && $res['id'] != $data['uid']){
                 return ApiReturn::error('用户名已存在');
             }
-//            //验证验证码
-//            $check = (new MessageLogic())->checkPhoneCode($data['phone'],$data['code']);
-//            if(!$check){
-//                return ApiReturn::error('验证码错误');
-//            }
+            //验证验证码
+            $check = (new MessageLogic())->checkPhoneCode($data['mobile'],$data['code']);
+            if(!$check){
+                return ApiReturn::error('验证码错误');
+            }
             unset($data['code']);
             //判断微信号是否存在
             $res = (new UserLogic())->getInfo(['weixin'=>$data['weixin']],false,'id');
@@ -298,11 +316,28 @@ class UserLogic   extends BaseLogic
             return ApiReturn::error('更新失败');
         }
 
+    }
 
-
-
-
-
+    /**
+     * @param $data
+     * @return array|mixed|string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function saveInfo($data)
+    {
+        $field = ['id','username','level'];
+        $res = $this->checkFields($field,$data['data']);
+        if($res !== ENABLE){
+            return '缺少参数';
+        }
+        $res = (new UserLogic())->save($data['data'],['id' => $data['data']['id']]);
+        if($res){
+            return '成功';
+        }else{
+            return '失败';
+        }
     }
 
     /**

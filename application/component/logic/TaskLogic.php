@@ -41,11 +41,13 @@ class TaskLogic  extends BaseLogic
             'id' => $data['t_id'],
             'p_id' => $data['p_id'],
             'uid' => $data['uid'],
-            'status' => DISABLE
+//            'status' => DISABLE
         ];
         $res = (new TaskLogic())->getInfo($map);
         if(empty($res)){
             return ApiReturn::error('任务信息错误');
+        }elseif ($res['status'] == ENABLE){
+            return ApiReturn::error('已完成');
         }
 
         //更改任务状态为已完成
@@ -393,7 +395,7 @@ class TaskLogic  extends BaseLogic
 
         $offset = $this->getOffset($pageNo,$pagesize);
         $list = $result->order('id desc')
-            ->field('id,p_id,uid,user_level,visitor_ids,point_ids,point_num,step_ids,step_num,status,level,assess,assess_content,voice,length,type,is_send,home_page,create_time,update_time')
+            ->field('id,p_id,uid,user_level,visitor_ids,point_ids,point_num,step_ids,step_num,status,level,assess,assess_content,voice,text_content,length,type,is_send,home_page,create_time,update_time')
             ->limit($offset,$pagesize)
             ->select();
         foreach ($list as $k => $v){
@@ -456,7 +458,13 @@ class TaskLogic  extends BaseLogic
             //判断当前该任务的点赞数量
             if($where['point_num'] == 1 && $taskInfo['step_num'] == 0 && $taskInfo['level'] != 2){
                 //三个全部点赞，则为该任务用户发布一条动态
-                $data = [
+                $data = $taskInfo['text_content'] ? [
+                    'uid' => $taskInfo['uid'],
+                    't_id' => $taskInfo['id'],
+                    'content' => $taskInfo['text_content'],
+                    'type' => 5,
+                    'cate' => 1,
+                ] : [
                     'uid' => $taskInfo['uid'],
                     't_id' => $taskInfo['id'],
                     'voice' => $taskInfo['voice'],
@@ -466,7 +474,7 @@ class TaskLogic  extends BaseLogic
                 ];
                 $res = (new DynamicLogic())->save($data);
                 //给用户发送模板消息
-                $url = '';
+                $url = config('webUrl.h5Url');
                 $appid = config('wxUrl.appid');
                 $res = (new TemplateLogic())->sendDynamicTemplate($taskInfo['uid'],$url,$appid,$uid,$id);
             }
@@ -697,6 +705,15 @@ class TaskLogic  extends BaseLogic
                     'level' => 1,
                     'q_uid' => $uid
                 ]);
+
+                //给上级发送一条模板消息通知
+                //1：选择完标签给上级发送
+                //2：任务点赞发布语音动态
+                $uid = $userInfo['id'];
+                $url = config('webUrl.h5Url');
+                $appid = config('wxUrl.appid');
+                (new TemplateLogic())->sendTaskTemplate($uid,$url,$appid);
+
             }else{
                 //只推荐三个人
                 //获取用户的上级信息
@@ -707,6 +724,7 @@ class TaskLogic  extends BaseLogic
                     'one' => $visitor_ids[0],
                     'two' => $visitor_ids[1],
                     'three' => $visitor_ids[2],
+                    'type' => $type,
                     'level' => 0
                 ];
                 (new TaskLogic())->getInsertId($data);
@@ -921,13 +939,56 @@ class TaskLogic  extends BaseLogic
         $t_id = $data['t_id'];
         $res = (new TaskLogic())->save(['voice' => $voice,'length' => $length],['id' => $t_id]);
         if($res){
+            //给匹配的游客发送模板消息
+            $taskInfo = (new TaskLogic())->getInfo(['id'=>$t_id],false,'id,uid,p_id,visitor_ids');
+            $user = (new UserLogic())->getInfo(['id'=>$taskInfo['uid']],false,'username');
+            $parent = (new UserLogic())->getInfo(['id'=>$taskInfo['p_id']],false,'username');
+            $visitor_ids = explode(',',$taskInfo['visitor_ids']);
+            $url = config('webUrl.h5Url');
+            $appid = config('wxUrl.appid');
+            foreach($visitor_ids as $v){
+                (new TemplateLogic())->sendAssessTemplate($v,$url,$appid,$user['username'],$parent['username']);
+            }
             return ApiReturn::success('上传成功');
         }else{
             return ApiReturn::error('上传失败');
         }
-
     }
 
+        /**
+         * 发送语音
+         * @param $data
+         * @return array|mixed|string
+         * @throws \think\db\exception\DataNotFoundException
+         * @throws \think\db\exception\ModelNotFoundException
+         * @throws \think\exception\DbException
+         */
+        public function add_text($data)
+    {
+        $field = ['text_content','t_id'];
+        $res = $this->checkFields($field,$data);
+        if($res !== ENABLE){
+            return $res;
+        }
+        $text_content = $data['text_content'];
+        $t_id = $data['t_id'];
+        $res = (new TaskLogic())->save(['text_content' => $text_content],['id' => $t_id]);
+        if($res){
+            //给匹配的游客发送模板消息
+            $taskInfo = (new TaskLogic())->getInfo(['id'=>$t_id],false,'id,uid,p_id,visitor_ids');
+            $user = (new UserLogic())->getInfo(['id'=>$taskInfo['uid']],false,'username');
+            $parent = (new UserLogic())->getInfo(['id'=>$taskInfo['p_id']],false,'username');
+            $visitor_ids = explode(',',$taskInfo['visitor_ids']);
+            $url = config('webUrl.h5Url');
+            $appid = config('wxUrl.appid');
+            foreach($visitor_ids as $v){
+                (new TemplateLogic())->sendAssessTemplate($v,$url,$appid,$user['username'],$parent['username'],2);
+            }
+            return ApiReturn::success('发送成功');
+        }else{
+            return ApiReturn::error('发送失败');
+        }
 
+    }
 
 }

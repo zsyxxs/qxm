@@ -57,6 +57,18 @@ class UserApi extends BaseApi
     }
 
     /**
+     * 根据unionid获取用户信息
+     * @return array|string
+     */
+    public function getUserInfoByUnionid()
+    {
+        $data = $_REQUEST;
+        $res = (new UserLogic())->getUserInfoByUnionid($data);
+        return $res;
+    }
+
+
+    /**
      * 用户下线统计
      * @return array|string
      * @throws \think\db\exception\DataNotFoundException

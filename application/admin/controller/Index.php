@@ -24,8 +24,17 @@ class Index extends BaseAdmin
 
         //统计付费会员总数
         $total_fee_num = (new UserLogic())->count(['level' => array('egt',1)]);
+        $total_fee_num = Db::table('user')
+            ->where('level','egt',1)
+            ->where('invite_code','neq','Mrtengda')
+            ->where('type',0)
+            ->count('*');
 //        dump($total_fee_num);
         $this->assign('total_fee_num',$total_fee_num);
+
+        //统计免费会员总数
+        $total_free_user = (new UserLogic())->count(['invite_code'=>'Mrtengda']);
+        $this->assign('total_free_user', $total_free_user);
 
         //统计昨日新增付费会员
         $yesterday_begin = mktime(0,0,0,date('m'),date('d') - 1, date('y'));
@@ -44,7 +53,7 @@ class Index extends BaseAdmin
         $this->assign('total_free_num',$total_free_num);
 
         //未完成任务数
-        $unfinish_task = (new TaskLogic())->count(['assess'=>0]);
+        $unfinish_task = (new TaskLogic())->count(['assess'=>0,'type'=>1]);
 //        dump($unfinish_task);
         $this->assign('unfinish_task',$unfinish_task);
 

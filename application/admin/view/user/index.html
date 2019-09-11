@@ -22,16 +22,16 @@
 
 </head>
 <body>
-<div class="x-nav">
+<!--<div class="x-nav">-->
     <!--<span class="layui-breadcrumb">-->
     <!--<a href="">首页</a>-->
     <!--<a href="">演示</a>-->
     <!--<a>-->
     <!--<cite>导航元素</cite></a>-->
     <!--</span>-->
-    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
-        <i class="layui-icon" style="line-height:30px">ဂ</i></a>
-</div>
+    <!--<a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">-->
+        <!--<i class="layui-icon" style="line-height:30px">ဂ</i></a>-->
+<!--</div>-->
 <div class="x-body">
     <div class="layui-row">
         <form class="layui-form layui-col-md12 x-so" method="post">
@@ -40,6 +40,8 @@
             用户名&nbsp;<input type="text" value="{$username}" name="username"  placeholder="请输入用户名" autocomplete="off" class="layui-input">
             <button class="layui-btn" type="submit"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
         </form>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right; position: absolute; right: 2%;" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon" style="line-height:30px">ဂ</i></a>
     </div>
     <xblock>
         <!--<button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="layui-icon"></i>批量删除</button>-->
@@ -73,15 +75,15 @@
                 <img  class="check-img fl picture"   width="45"  height ="45" style="100%"  src="{$v.logo}"  />
             </td>
             <td>{$v.mobile}</td>
-
+            {php}$mian = $v['invite_code']=='Mrtengda' ? '【免】' : '';{/php}
             <td>
-                {if condition="($v.level == 0)"} 游客
-                {elseif condition="$v.level eq 1"/}新人
-                {elseif condition="$v.level eq 2"/}牵线喵
-                {elseif condition="$v.level eq 3"/}青铜
-                {elseif condition="$v.level eq 4"/}黄金
-                {elseif condition="$v.level eq 5"/}白银
-                {elseif condition="$v.level eq 6"/}钻石
+                {if condition="($v.level == 0)"} 游客{$mian}
+                {elseif condition="$v.level eq 1"/}新人{$mian}
+                {elseif condition="$v.level eq 2"/}牵线喵{$mian}
+                {elseif condition="$v.level eq 3"/}青铜{$mian}
+                {elseif condition="$v.level eq 4"/}白银{$mian}
+                {elseif condition="$v.level eq 5"/}黄金{$mian}
+                {elseif condition="$v.level eq 6"/}钻石{$mian}
                 {/if}
             </td>
             <td>

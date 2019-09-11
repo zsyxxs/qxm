@@ -63,7 +63,7 @@ class TaskApi extends BaseApi
         return $res;
     }
 
-    /**
+    /**d
      * 任务卡列表
      * @return array|string
      * @throws \think\db\exception\DataNotFoundException
@@ -187,6 +187,20 @@ class TaskApi extends BaseApi
     {
         $data = $_REQUEST;
         $res = (new TaskLogic())->add_voice($data);
+        return $res;
+    }
+
+    /**
+     * 发送文字
+     * @return array|mixed|string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function add_text()
+    {
+        $data = $_REQUEST;
+        $res = (new TaskLogic())->add_text($data);
         return $res;
     }
 
