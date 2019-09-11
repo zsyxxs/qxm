@@ -69,7 +69,8 @@
             <td>{$v.id}</td>
             <td>{$v.money / 100}</td>
             <td>
-                <a href="{:url('admin/user/information')}?id={$v.id}" style ="color: #f82929;">{$v.username}</a>
+                {php}$color = $v['sex']==1 ? 'color: #f82929;' : 'color: #29acf8;';{/php}
+                <a href="{:url('admin/user/information')}?id={$v.id}" style ="{$color}">{$v.username}</a>
             </td>
             <td>
                 <img  class="check-img fl picture"   width="45"  height ="45" style="100%"  src="{$v.logo}"  />
