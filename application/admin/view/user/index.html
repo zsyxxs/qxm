@@ -69,7 +69,7 @@
             <td>{$v.id}</td>
             <td>{$v.money / 100}</td>
             <td>
-                {php}$color = $v['sex']==1 ? 'color: #f82929;' : 'color: #29acf8;';{/php}
+                {php}$color = $v['sex']==2 ? 'color: #f82929;' : 'color: #29acf8;';{/php}
                 <a href="{:url('admin/user/information')}?id={$v.id}" style ="{$color}">{$v.username}</a>
             </td>
             <td>
