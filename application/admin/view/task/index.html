@@ -47,6 +47,7 @@
             <th>评价</th>
             <th>点赞数</th>
             <th>灭灯数</th>
+            <th>语音</th>
             <th>创建时间</th>
             <!--<th>状态</th>-->
             <!--<th>操作</th>-->
@@ -56,7 +57,8 @@
         <tr>
             <td>{$v.id}</td>
             <td>
-                <a href="{:url('admin/task/information')}?id={$v.id}" style ="color: #f82929;">{$v.username}</a>
+                {php}$color = $v['sex']==2 ? 'color: #f82929;' : 'color: #29acf8;';{/php}
+                <a href="{:url('admin/task/information')}?id={$v.id}" style ="{$color}">{$v.username}</a>
             </td>
             <td>
                 {eq name='$v.status' value ='0' }未完成
@@ -85,6 +87,10 @@
                 {/notempty}
 
             </td>
+            {php}
+                $vc = $v['voice'] || $v['text_content'] ? ($v['voice'] ? '<font color="#29d2f8">有</font>' : '<font color="#000">文字</font>') : '无';
+            {/php}
+            <td>{$vc}</td>
             <td>{$v.create_time|date="Y-m-d H:i:s",###}</td>
             <!--<td class="td-manage">-->
                 <!--<a title="编辑"  onclick="x_admin_show('编辑','edit/?id={$v.id}',600,400)" href="javascript:;">-->

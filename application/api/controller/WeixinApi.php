@@ -29,7 +29,11 @@ class WeixinApi extends BaseApi
     {
         $url = $this->_param('url','h5.qxmiao.com');
         $res = (new WxresultApi())->getSign($url);
-        return ApiReturn::success('success',$res);
+        if($res){
+            return ApiReturn::success('success',$res);
+        }else{
+            return ApiReturn::error('失败');
+        }
     }
 
     /**

@@ -53,18 +53,32 @@ class WxresultApi extends WxUrl
         //下载微信语音并保存
         $this->downAndSaveFile($url,$path."/".$filename);
 
-
-        //将amr格式转换为MP3格式
         //要转换的amr文件地址
         $armFile = "/uploads/voice/amr/".$filename;
-        //转换后的MP3文件保存的文件名
-        $mp3Filename = "wxupload_".date('Ymd').time().rand(1111,9999).".mp3";
-        //转换后的MP3文件保存的路径
-        $mp3File = "/uploads/voice/mp3/".$mp3Filename;
-        $this->amrTransCodingMp3($armFile, $mp3File);
+//        $mode = 1; //将amr格式转换为MP3格式
+//        $mode = 2; //将amr格式转换为wav格式
+        $mode = 3; //原始amr 文件
+        if($mode==1){
+            //转换后的MP3文件保存的文件名
+            $mp3Filename = "wxupload_".date('Ymd').time().rand(1111,9999).".mp3";
+            //转换后的MP3文件保存的路径
+            $mp3File = "/uploads/voice/mp3/".$mp3Filename;
+            $this->amrTransCodingMp3($armFile, $mp3File);
+            //上传到oss
+            $res = $this->uploadFile($mp3Filename,$mp3File);
+        }else if($mode==2){
+            //转换后的WAV文件保存的文件名
+            $wavFilename = "wxupload_".date('Ymd').time().rand(1111,9999).".wav";
+            //转换后的MP3文件保存的路径
+            $wavFile = "/uploads/voice/wav/".$wavFilename;
+            $this->amrTransCodingWav($armFile, $wavFile);
 
-        //上传到oss
-        $res = $this->uploadFile($mp3Filename,$mp3File);
+            //上传到oss
+            $res = $this->uploadFile($wavFilename, $wavFile);
+        }else{
+            //上传到oss
+            $res = $this->uploadFile($filename, $armFile);
+        }
         return ApiReturn::success('success',$res['info']['url']);
     }
 
@@ -85,8 +99,16 @@ class WxresultApi extends WxUrl
     public function amrTransCodingMp3($armFile, $mp3File)
     {
         $dir = $_SERVER['DOCUMENT_ROOT'];
-        exec("ffmpeg -y -i ".$dir.$armFile." ".$dir.$mp3File);
+        exec("ffmpeg -i ".$dir.$armFile." ".$dir.$mp3File);
         return $mp3File;
+    }
+
+    //将微信语音amr格式转换为WAV格式
+    public function amrTransCodingWav($armFile, $wavFile)
+    {
+        $dir = $_SERVER['DOCUMENT_ROOT'];
+        exec("ffmpeg -i ".$dir.$armFile." ".$dir.$wavFile);
+        return $wavFile;
     }
 
     function uploadFile($mp3Filename,$mp3File)
@@ -364,6 +386,9 @@ class WxresultApi extends WxUrl
         ];
         $result = (new WxvalueApi())->get_result_get($url,$data);
         $result = json_decode($result,true);
+        if(!isset($result['ticket'])){
+            return false;
+        }
         //写入数据库
         $title = 'jsapi';
 //        $res = $res = (new HouseTokenLogic())->saveInfo($result['ticket'],$title);

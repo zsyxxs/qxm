@@ -63,6 +63,14 @@ class TaskLogic  extends BaseLogic
 
     }
 
+    /**
+     * 测试微信模板
+     */
+    public  function  test_send_tem(){
+        $url = config('webUrl.h5Url');
+        $appid = config('wxUrl.appid');
+        return (new TemplateLogic())->sendTaskTemplate(8, $url,$appid);
+    }
 
     /**
      * 评价任务
@@ -166,7 +174,7 @@ class TaskLogic  extends BaseLogic
     {
         $query = Db::table('task')->alias('t')
             ->join('user u','t.uid = u.id')
-            ->field('t.*,u.username')
+            ->field('t.*,u.username,u.sex')
             ->order($order);
 
         if(!empty($status)){
@@ -197,10 +205,14 @@ class TaskLogic  extends BaseLogic
         $task = Db::table('task')->alias('t')
             ->join('user u','t.uid=u.id')
             ->where('t.id',$id)
-            ->field('t.*,u.username')
+            ->field('t.*,u.username,u.flag_like,u.sex')
             ->find();
         $parent = (new UserLogic())->getInfo(['id'=>$task['p_id']]);
         $task['parentName'] = $parent['username'];
+
+        $flag_like = explode(',',$task['flag_like']);
+        $like_flag = (new FlagsLogic())->column('title', ['id'=>array('in',$flag_like)]);
+        $task['username'] = $like_flag ? $task['username'].'('.implode('，',$like_flag).')' : $task['username'];
         return $task;
 
     }
@@ -216,8 +228,14 @@ class TaskLogic  extends BaseLogic
         $visitor_name = [];
         foreach ($v_ids as $v){
             $user = (new UserLogic())->getInfo(['id'=>$v]);
+            $flag_user = explode(',',$user['flag_user']);
+            $user_flag = (new FlagsLogic())->column('title', ['id'=>array('in',$flag_user)]);
             if($user){
-                array_push($visitor_name,$user['username']);
+                if($user_flag){
+                    array_push($visitor_name,$user['username']."(".implode('，',$user_flag).')');
+                }else{
+                    array_push($visitor_name, $user['username']);
+                }
             }
         }
         return $visitor_name;
@@ -611,7 +629,8 @@ class TaskLogic  extends BaseLogic
                 $map = [
                     'fu.f_id' => $v,
                     'fu.uid' => array('not in',$forbid_uid),
-                    'u.status' => 1
+                    'u.status' => 1,
+                    'u.is_hide' => 0,
                 ];
                 $order = 'fu.num asc';
 //            $res = (new FlagUserLogic())->getInfo($map,$order,'uid');

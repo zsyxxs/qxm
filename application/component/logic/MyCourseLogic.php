@@ -90,8 +90,11 @@ class MyCourseLogic  extends BaseLogic
             ->field('c.id,c.author,c.title,m.create_time');
         $offset = $this->getOffset($data['pageNo'],$data['pagesize']);
         $res = $query->limit($offset,$data['pagesize'])->select();
-        return ApiReturn::success('success',$res);
-
+        if(isset($res[0])){
+            return ApiReturn::success('success',$res);
+        }else{
+            return ApiReturn::error('培训老师正在准备教程');
+        }
 
     }
 

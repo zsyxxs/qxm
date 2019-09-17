@@ -71,9 +71,10 @@ class CashLogic  extends BaseLogic
 
     public function getListss($where,$pagesize,$order,$start,$end)
     {
+        $join = [['user u', 'c.uid=u.id','left'],['cash_transfers ct', 'c.id=ct.cash_id','left']];
         $query = Db::table('cash')->alias('c')
-            ->join('user u','c.uid=u.id','left')
-            ->field('c.*,u.username,u.money total_money,u.status user_status')
+            ->join($join)
+            ->field('c.*,u.username,u.money total_money,u.status user_status,ct.payment_no')
             ->where($where)
             ->order($order);
         if(!empty($start)){
@@ -83,8 +84,12 @@ class CashLogic  extends BaseLogic
         {
             $query = $query->where('c.create_time','<',strtotime($end));
         }
-        $count = Db::table('cash')->alias('c')->where($where)->count();
-        $lists = $query->fetchSql(false)->paginate($pagesize);
+        if($where){
+            $count = Db::table('cash')->alias('c')->join($join)->where($where)->count();
+        }else{
+            $count = Db::table('cash')->alias('c')->where($where)->count();
+        }
+        $lists = $query->fetchSql(false)->paginate($pagesize,false, ['query'=>$where]);
         $page = $lists->render();
         return ['page'=>$page,'list'=>$lists,'count'=>$count];
     }

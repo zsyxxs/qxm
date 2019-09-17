@@ -19,11 +19,12 @@
         'controller_auto_search' => false,
         // 视图输出字符串内容替换
         'view_replace_str'       => [
-            'LAYUI_CSS' => '/static/layui/css',
-            'LAYUI_JS'  => '/static/layui',
-            'ADMIN_CSS' => '/static/admin/css',
-            'ADMIN_JS' => '/static/admin/js',
-            'ADMIN_IMAGES' => '/static/admin/images',
-            'ADMIN_LIB' => '/static/admin/lib',
+            'Ueditor' => '/public/ueditor',
+            'LAYUI_CSS' => '/public/static/layui/css',
+            'LAYUI_JS'  => '/public/static/layui',
+            'ADMIN_CSS' => '/public/static/admin/css',
+            'ADMIN_JS' => '/public/static/admin/js',
+            'ADMIN_IMAGES' => '/public/static/admin/images',
+            'ADMIN_LIB' => '/public/static/admin/lib',
         ],
     ];

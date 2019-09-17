@@ -16,7 +16,6 @@ use think\Db;
 
 class ComplainLogic  extends BaseLogic
 {
-
     /**
      * 动态投诉
      * @param $data
@@ -53,8 +52,18 @@ class ComplainLogic  extends BaseLogic
                     //删除该动态
                     $res = (new DynamicLogic())->save(['status' => 0,'is_complain' => 1],['id'=>$d_id]);
                     //用户被投诉次数加1
-                    $com_user = (new DynamicLogic())->getInfo(['id'=>$d_id],false,'id,uid');
+                    $com_user = (new DynamicLogic())->getInfo(['id'=>$d_id],false,'id,uid,ns_endtime');
                     (new UserLogic())->setInc(['id'=>$com_user['uid']],'complain_num',1);
+
+                    //获取用户所有动态
+                    $com_list = (new DynamicLogic())->getLists(['id'=>$com_user['uid'], 'create_time'=>array('gt',$com_user['ns_endtime'])], 'id desc', 'id, is_complain');
+
+                    $cnum = 0;
+                    foreach ($com_list as $row){
+                        $cnum = $row['is_complain'] ? $cnum+1 : 0;
+                        if($cnum>=3) break;
+                    }
+                    if($cnum>=3) Db::table("user")->where('id', $com_user['uid'])->setField('ns_endtime', strtotime('+7 day'));
                 }
             }
 

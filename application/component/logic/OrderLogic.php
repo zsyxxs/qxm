@@ -61,4 +61,28 @@ class OrderLogic  extends BaseLogic
 
     }
 
+    public function getListss($where,$pagesize,$order,$start,$end)
+    {
+        $query = Db::table('order')->alias('c')
+            ->join('user u','c.uid=u.id','left')
+            ->field('c.*,u.username,u.money total_money,u.status user_status')
+            ->where($where)
+            ->order($order);
+        if(!empty($start)){
+            $query = $query->where('c.create_time','>',strtotime($start));
+        }
+        if(!empty($end))
+        {
+            $query = $query->where('c.create_time','<',strtotime($end));
+        }
+        if($where){
+            $count = Db::table('order')->alias('c')->join('user u','c.uid=u.id','left')->where($where)->count();
+        }else{
+            $count = Db::table('order')->alias('c')->where($where)->count();
+        }
+        $lists = $query->fetchSql(false)->paginate($pagesize);
+        $page = $lists->render();
+        return ['page'=>$page,'list'=>$lists,'count'=>$count];
+    }
+
 }

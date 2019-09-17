@@ -10,6 +10,7 @@ namespace app\api\controller;
 
 
 
+use app\component\logic\DynamicLogic;
 use app\component\logic\TaskLogic;
 use app\component\logic\UserLogic;
 use app\component\logic\VoiceCommissionLogic;
@@ -89,6 +90,31 @@ class TaskApi extends BaseApi
         $data = $_REQUEST;
         $res = (new TaskLogic())->point_up($data);
         return $res;
+    }
+
+    /**
+     * 手动推送任务
+     * @return array|mixed|string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function show_dynamic(){
+        $tid = input("param.tid");
+        $taskInfo = (new TaskLogic())->getInfo(['id' => $tid]);
+        if($taskInfo){
+            $dy = (new DynamicLogic())->getInfo(['t_id'=>$tid]);
+            $map = $dy['id'] ? ['id'=>$dy['id']] : false;
+            $data = [
+                'uid' => $taskInfo['uid'],
+                't_id' => $taskInfo['id'],
+                'voice' => $taskInfo['voice'],
+                'length' => $taskInfo['length'],
+                'type' => 3,
+                'cate' => 1,
+            ];
+            return (new DynamicLogic())->save($data, $map);
+        }
     }
 
     /**
@@ -188,6 +214,13 @@ class TaskApi extends BaseApi
         $data = $_REQUEST;
         $res = (new TaskLogic())->add_voice($data);
         return $res;
+    }
+
+    /**
+     * 测试微信模板
+     */
+    public  function  test_send_tem(){
+        return (new TaskLogic())->test_send_tem();
     }
 
     /**

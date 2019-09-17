@@ -13,6 +13,13 @@
     <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
     <script type="text/javascript" src="ADMIN_LIB/layui/layui.js" charset="utf-8"></script>
     <script type="text/javascript" src="ADMIN_JS/xadmin.js"></script>
+    <!--Ueditor-->
+    <link href="Ueditor/themes/default/css/umeditor.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="Ueditor/third-party/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="Ueditor/umeditor.config.js"></script>
+    <script type="text/javascript" charset="utf-8" src="Ueditor/umeditor.min.js"></script>
+    <script type="text/javascript" src="Ueditor/lang/zh-cn/zh-cn.js"></script>
+
     <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
     <!--[if lt IE 9]>
     <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
@@ -20,6 +27,10 @@
     <![endif]-->
     <style>
         .layui-form-item .layui-input-inline {width: 500px}
+        .edui-image-content{height: 200px !important;}
+        .edui-tab-content{height: 200px !important;}
+        .edui-dialog-image-body,.edui-dialog-video-body{height: 200px !important;}
+        .edui-editor-body img{max-width: 100%}
     </style>
 </head>
 
@@ -68,13 +79,28 @@
         </div>
 
         <div class="layui-form-item">
+            <label for="content" class="layui-form-label">
+                教程内容
+            </label>
+            <div class="layui-input-inline">
+                <script type="text/plain" id="myEditor" style="width: 100%"></script>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
             <label  class="layui-form-label">
             </label>
             <button  class="layui-btn" lay-filter="add" lay-submit id="submit-btn">增加</button>
         </div>
     </form>
 </div>
-<script type="text/javascript" th:inline="javascript">
+<script type="text/javascript">
+    var um = UM.getEditor('myEditor',{
+        imageUrl: "{:url('/Upload/upload')}",
+        imagePath: '',
+        autoFloatEnabled: false,
+        // textarea:'con',
+    });
     layui.use('upload', function(){
         var upload = layui.upload
             , $ = layui.jquery;
@@ -140,6 +166,7 @@
 
     layui.use(['form','layer'], function(){
         var form = layui.form;
+        console.log(form);
         //自定义验证规则
         form.verify({
             title: function(value){

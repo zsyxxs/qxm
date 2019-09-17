@@ -55,4 +55,40 @@ function code($text,$logo = ''){
     return $saveName;
 }
 
+//阶乘
+function factorial($n){
+    return array_product(range(1, $n));
+}
+
+//阶乘的组合
+function getFactorial($arr, $list=array()) {
+    shuffle($arr);
+    $a = $arr;
+    $a = implode(",", $a);
+    if($list){
+        if(!in_array($a, $list)){
+            $list[] = $a;
+        }
+    }else{
+        $list[] = $a;
+    }
+    $n = count($arr);
+    $num = count($list);
+    if(factorial($n)>$num) return getFactorial($arr, $list);
+    sort($list);
+    return $list;
+}
+
+//aes cbc 128 解密
+function aesEn($str){
+    $aes = new \encrypt\AesEncrypt('1234567890abcdef');
+    return $aes->encrypt($str);
+}
+
+//aes cbc 128 解密
+function aesDe($str){
+    $aes = new \encrypt\AesEncrypt('1234567890abcdef');
+    return $aes->decrypt($str);
+}
+
 

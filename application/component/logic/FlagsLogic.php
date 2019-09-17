@@ -177,7 +177,7 @@ class FlagsLogic  extends BaseLogic
     {
         $list = Db::table('flags')
             ->where(['level'=>1,'status' => 1,'type'=>0])
-            ->order('sort deac , create_time asc')
+            ->order('sort DESC , create_time asc')
             ->select();
         return ApiReturn::success('success',$list);
     }
@@ -386,6 +386,7 @@ class FlagsLogic  extends BaseLogic
             'f.title' => array('like',"%$title%"),
             'u.status' => 1,
             'u.id' => array('neq',$uid),
+            'u.is_hide'=> 0,
         ];
         $query = Db::table('flag_user')->alias('fu')
             ->join('flags f','f.id=fu.f_id')

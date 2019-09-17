@@ -32,25 +32,24 @@
             <input class="layui-input" placeholder="开始日" value="{$start}" name="start" id="start">
             <input class="layui-input" placeholder="截止日" value="{$end}" name="end" id="end">
             <input type="text" name="username"  placeholder="请输入用户名" autocomplete="off" class="layui-input">
-            <input type="text" name="payment_no"  placeholder="请输入订单号" autocomplete="off" class="layui-input">
+            <input type="text" name="order_num"  placeholder="请输入订单号" autocomplete="off" class="layui-input">
             <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
         </form>
     </div>
     <xblock>
         <!--<button class="layui-btn" onclick="x_admin_show('添加用户','add',800,600)"><i class="layui-icon"></i>添加</button>-->
         <a href="index" {if condition='$type==""'}class="layui-btn"{else /} class="layui-btn layui-btn-primary"{/if}>全部记录</a>&ensp;&ensp;
-        <a href="index?type=0" {if condition='$type=="0"'}class="layui-btn"{else /} class="layui-btn layui-btn-primary"{/if}>申请记录</a>&ensp;&ensp;
+        <a href="index?type=0" {if condition='$type=="0"'}class="layui-btn"{else /} class="layui-btn layui-btn-primary"{/if}>失败记录</a>&ensp;&ensp;
         <a href="index?type=1" {if condition='$type=="1"'}class="layui-btn"{else /} class="layui-btn layui-btn-primary"{/if}>成功记录</a>&ensp;&ensp;
     </xblock>
     <table class="layui-table">
         <thead>
         <tr>
-            <th>提现用户</th>
+            <th>付款用户</th>
             <th>用户状态</th>
-            <th>账户余额(元)</th>
-            <th>申请提现金额(元)</th>
-            <th>申请时间</th>
-            <th>订单号</th>
+            <th>付款订单</th>
+            <th>付款金额</th>
+            <th>付款时间</th>
             <th>状态</th>
         </thead>
         <tbody>
@@ -69,21 +68,14 @@
                 {/eq}
 
             </td>
-            <td>{$v.total_money / 100}</td>
+            <td>{$v.order_num}</td>
             <td>{$v.money / 100}</td>
-            <td>{$v['create_time']|date='Y-m-d H:i:s',###}</td>
-            <td>{$v.payment_no}</td>
+            <td>{$v['update_time']|date='Y-m-d H:i:s',###}</td>
             <td class="td-status">
                 {eq name='$v.status' value='0'}
-                    {if condition="($v.money > $v.total_money) "}
-                    <button class="layui-btn" id="normal"  style="background-color: red;" href="javascript:;">
-                        异常记录
-                    </button>
-                    {else\}
-                    <a class="layui-btn" id="tixian" onclick="set_status(this,'{$v.id}','{$v.status}')" style="background-color: red;" href="javascript:;">
-                        申请
-                    </a>
-                    {/if}
+                <button class="layui-btn" id="normal"  style="background-color: red;" href="javascript:;">
+                    失败
+                </button>
                 {else/}
                 <button class="layui-btn">
                     成功

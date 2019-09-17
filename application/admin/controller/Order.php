@@ -12,15 +12,12 @@ namespace app\admin\controller;
 
 use app\api\controller\WeixinApi;
 use app\component\interfaces\weixin\api\WxresultApi;
-use app\component\logic\CashLogic;
-use app\component\logic\CashLogLogic;
-use app\component\logic\DetailesLogic;
+use app\component\logic\OrderLogic;
 use app\component\logic\UserLogic;
 use think\Db;
 use think\Request;
-use app\component\interfaces\message\alidymsgapi\api_demo\SmsDemo;
 
-class Cash extends BaseAdmin
+class Order extends BaseAdmin
 {
     public function index()
     {
@@ -39,12 +36,12 @@ class Cash extends BaseAdmin
         if($username){
             $where = $where ? array_merge($where, ['u.username'=>$username]) : ['u.username'=>$username];
         }
-        $payment_no = $this->_param('payment_no');
-        if($payment_no){
-            $where = $where ? array_merge($where, ['ct.payment_no'=>$payment_no]) : ['ct.payment_no'=>$payment_no];
+        $order_num = $this->_param('order_num');
+        if($order_num){
+            $where = $where ? array_merge($where, ['c.order_num'=>$order_num]) : ['c.order_num'=>$order_num];
         }
         $order= 'c.create_time DESC';
-        $list = (new CashLogic())->getListss($where,$pagesize,$order,$start,$end);
+        $list = (new OrderLogic())->getListss($where,$pagesize,$order,$start,$end);
         $count = $list['count'];
         $this->assign('list',$list['list']);
         $this->assign('count',$count);

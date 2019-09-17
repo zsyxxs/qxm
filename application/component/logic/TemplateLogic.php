@@ -41,14 +41,14 @@ class TemplateLogic  extends BaseLogic
 
         $flags_like = explode(',',$userInfo['flag_like']);
         $flags = (new FlagsLogic())->getLists(['id'=>array('in',$flags_like)],false,'id,title');
-        $title = '';
+        $title = [];
         foreach ($flags as $k => $v){
-            $title .= $v['title'].',';
+            $title[] = $v['title'];
         }
-
+        $title = implode("  ", $title);
         $taskInfo = (new TaskLogic())->getInfo(['p_id'=>$parentInfo['id'],'uid'=>$userInfo['id']],false,'id,create_time,update_time');
 
-        $keyword2 = '《帮助'.$userInfo['username'].'完成自我介绍语音》';
+        $keyword2 = '《帮助  '.$userInfo['username'].'  完成自我介绍语音》';
         $res = $this->getData($parentInfo['openid'],$template_id,$url,$appid,$first,$taskInfo['create_time'],$keyword2,$title,$description);
         return $res;
     }

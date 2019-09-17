@@ -41,7 +41,7 @@ class Index extends BaseAdmin
         $yesterday_end = mktime(23,59,59,date('m'),date('d') - 1 ,date('y'));
         $yesterday_fee_num = Db::table('user')->alias('u')
                             ->join('order o','u.id = o.uid')
-                            ->where('u.level',1)
+                            ->where('o.status',1)
                             ->where('o.update_time','between',[$yesterday_begin,$yesterday_end])
                             ->count();
 //        dump($yesterday_fee_num);

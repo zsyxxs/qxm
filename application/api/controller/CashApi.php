@@ -12,6 +12,7 @@ namespace app\api\controller;
 
 
 
+use app\api\helper\ApiReturn;
 use app\component\logic\CashLogic;
 use app\component\logic\CommissionLogic;
 use app\component\logic\QxCommissionLogic;
@@ -54,7 +55,8 @@ class CashApi extends BaseApi
     {
         $data = $_REQUEST;
         $res = (new CashLogic())->cashList($data);
-        return $res;
+
+        return ApiReturn::success('success', $res);
     }
 
     /**

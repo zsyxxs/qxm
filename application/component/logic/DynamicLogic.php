@@ -68,7 +68,7 @@ class DynamicLogic  extends BaseLogic
         }
         //判断用户是否可用发布动态
         $userInfo = (new UserLogic())->getInfo(['id'=>$data['uid']],false,'id,status,complain_num,level');
-        if($userInfo['level'] < 3 || $userInfo['status'] != 1 || $userInfo['complain_num'] >=3){
+        if($userInfo['level'] < 1 || $userInfo['status'] != 1 || $userInfo['complain_num'] >=3){
             return ApiReturn::error('该用户不可发布动态');
         }
         //内容和图片必须有一个
@@ -103,12 +103,13 @@ class DynamicLogic  extends BaseLogic
         $order = 'd.stick desc,d.sort desc,d.id desc';
         $map = [
             'd.p_id' => 0,
-            'd.status' => 1
+            'd.status' => 1,
+            'd.is_complain'=>0,
         ];
         $query = Db::table('dynamic')->alias('d')
             ->join('user u','d.uid=u.id')
             ->where($map)
-            ->field('d.id,d.uid,d.p_id,d.c_uid,d.t_id,d.content,d.voice,d.length,d.imgs,d.type,d.cate,d.stick,d.point_ids,d.status,d.create_time,u.username,u.logo,u.level')
+            ->field('d.id,d.uid,d.p_id,d.c_uid,d.t_id,d.content,d.voice,d.length,d.imgs,d.type,d.cate,d.stick,d.point_ids,d.status,d.create_time,u.username,u.logo,u.level,u.flag_like,u.flag_user,u.is_hide')
             ->order($order);
         $offset = $this->getOffset($data['pageNo'],$data['pagesize']);
         $list = $query->limit($offset,$data['pagesize'])->select();
@@ -133,7 +134,7 @@ class DynamicLogic  extends BaseLogic
             $comments = Db::table('dynamic')->alias('d')
                 ->join('user u','d.uid = u.id')
                 ->where($where)
-                ->field('d.id,d.uid,d.p_id,d.c_uid,d.content,d.voice,d.length,d.imgs,d.type,d.cate,d.stick,d.point_ids,d.status,d.create_time,u.username')
+                ->field('d.id,d.uid,d.p_id,d.c_uid,d.content,d.voice,d.length,d.imgs,d.type,d.cate,d.stick,d.point_ids,d.status,d.create_time,u.username,u.flag_like,u.flag_user,u.is_hide')
                 ->select();
 
             $lists[$k]['comments'] = $comments;
@@ -150,7 +151,7 @@ class DynamicLogic  extends BaseLogic
             if(!empty($v['point_ids'])){
                 $point_ids = explode(',',$v['point_ids']);
                 foreach ($point_ids as $kk => $vv){
-                    $userInfo = (new UserLogic())->getInfo(['id'=>$vv],false,'id,username,level');
+                    $userInfo = (new UserLogic())->getInfo(['id'=>$vv],false,'id,username,level,flag_like,flag_user,is_hide');
                     array_push($point_info,$userInfo);
                 }
             }

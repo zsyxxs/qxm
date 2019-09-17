@@ -27,18 +27,20 @@ class User extends BaseAdmin
     public function index()
     {
         $username = $this->_param('username','');
+        $sex = $this->_param('sex','');
 
 
         $pagesize = 20;
         //根据用户信息，获取对应的权限列表
         $logic = new UserLogic();
-        $userLists = $logic->getUserListss($pagesize,$username);
+        $userLists = $logic->getUserListss($pagesize,$username,$sex);
 //        dump($userLists);
 
         $count = $userLists['count'];
         $page = $userLists['list']->render();
         $this->assign('UserLists',$userLists['list']);
         $this->assign('username',$username);
+        $this->assign('sex',$sex);
         $this->assign('count',$count);
         $this->assign('page',$page);
         return view();

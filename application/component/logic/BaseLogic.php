@@ -259,6 +259,25 @@ class BaseLogic
     }
 
     /**
+     * 根据条件获取多条数据(不分页)
+     * @param $map
+     * @param bool $order
+     * @param bool $field
+     * @return mixed
+     */
+    public function column($field, $map = [])
+    {
+        $query = $this->model;
+
+        if(!empty($map)) {
+            $query = $query -> where($map);
+        }
+
+        $result = $query ->column($field);
+        return $result;
+    }
+
+    /**
      * 根据条件分页(不带HTML)
      * @param array $map
      * @param bool $orderBy

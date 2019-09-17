@@ -32,7 +32,6 @@ class ComplainApi extends BaseApi
         return $res;
     }
 
-
     /**
      * 投诉原因列表
      * @return array

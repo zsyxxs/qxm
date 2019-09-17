@@ -110,6 +110,28 @@ class UserApi extends BaseApi
         return $res;
     }
 
+    /**
+     * 解除禁言
+     */
+    public function can_speak(){
+        $ids = (new UserLogic())->column('id','ns_endtime<'.time());
+        if($ids) (new UserLogic())->save(['ns_endtime'=>0], ['id'=>['in', $ids]]);
+    }
+
+    /**
+     * 设置隐身
+     * @param $data
+     * @return array|mixed|string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function set_hide()
+    {
+        $data = $_REQUEST;
+        $res = (new UserLogic())->setHide($data);
+        return $res;
+    }
 
     public function uploadUserImg()
     {

@@ -15,13 +15,13 @@ use think\Image;
 class Upload extends BaseApi
 {
     //上传文件(单个)
-    public function fileUpload()
+    public function fileUpload($file=false)
     {
-        $info = Request()->file('file');
+        $info = $file ? $file : Request()->file('file');
 
         if($info){
             //验证上传文件的合法性
-            $allow_type = ['.jpg','.jpeg','.png','.mp4','.mp3','.aac','.m4a'];
+            $allow_type = ['.jpg','.jpeg','.png','.mp4','.mp3','wav','.aac','.m4a'];
             $fileInfo = $info->getInfo();
             $format = strrchr($fileInfo['name'],'.');
             if(!in_array($format,$allow_type)){

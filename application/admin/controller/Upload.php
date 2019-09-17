@@ -90,12 +90,42 @@ class Upload extends BaseAdmin
         }
     }
 
+    private function upFile( $file )
+    {
+        return array(
+            "originalName" => $this->oriName ,
+            "name" => $this->fileName ,
+            "url" => $this->fullName ,
+            "size" => $this->fileSize ,
+            "type" => $this->fileType ,
+            "state" => $this->stateInfo
+        );
+    }
+
     // 编辑器  图片上传接口
     public function upload()
     {
-        $file = Request()->file('file');
+        $ue = input("param.editorid");
+        if($ue){
+            $file = request()->file();
+            $file = $file['upfile'];
+        }else{
+            $file = Request()->file('file');
+        }
         if($file){
             $res = (new \app\api\controller\Upload())->fileUpload($file);
+            if($ue){
+                $fileinfo = $file->getInfo();
+                echo json_encode(array(
+                    "originalName" => $fileinfo['name'] ,
+                    "name" => $fileinfo['name'] ,
+                    "url" => $res['data'] ,
+                    "size" => $fileinfo['size'] ,
+                    "type" => $fileinfo['type'] ,
+                    "state" => 'SUCCESS'
+                ));
+                exit;
+            }
             $result = [
                 'code' => 0,
                 'msg' => '上传成功',

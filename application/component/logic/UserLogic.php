@@ -15,10 +15,42 @@ use think\Db;
 
 class UserLogic   extends BaseLogic
 {
+    public function all_flags_true($uid, $flag_users, $flag_likes){
+        $u_num = count($flag_users);
+        $l_num = count($flag_likes);
+        if($u_num==3 && $l_num==3){
+            $str_sum = getFactorial($flag_likes);
+            $where = "(";
+            foreach ($str_sum as $row){
+                $where .= "".$row." OR";
+            }
+
+//            (new UserLogic())->column('id, flag_like',[]);
+        }
+    }
+
+    public function testColumn(){
+        $arr = getFactorial([35,27,5]);
+
+        $arr1 = getFactorial([22,5,85]);
+        $wh = '';
+        foreach ($arr as $row){
+            $wh .= "flag_like='".$row."' OR ";
+        }
+        $wh = substr($wh, 0,-4);
+
+        $wh1 = '';
+        foreach ($arr1 as $row){
+            $wh1 .= "flag_user='".$row."' OR ";
+        }
+        $wh1 = substr($wh1, 0,-4);
+        return Db::table("user")->where($wh)->where($wh1)->fetchSql(true)->column('id');
+    }
+
     public function rank($start,$end)
     {
         $start = strtotime($start);
-        $end = strtotime($end);
+        $end = strtotime($end.' 23:59:59');
        $query = Db::table('user')->alias('u')
            ->join('order o','u.id=o.uid')
            ->group('u.p_id')
@@ -210,19 +242,26 @@ class UserLogic   extends BaseLogic
      * @return array
      * @throws \think\exception\DbException
      */
-    public function getUserListss($pagesize,$username)
+    public function getUserListss($pagesize,$username,$sex='')
     {
         $order = 'create_time desc';
         $query = Db::table('user')
             ->order($order);
-        $count = Db::table('user')->count();
-        if(!empty($username)){
-            $query->where('username','like',"%$username%");
+        $where = [];
+        if(!empty($username) && $username){
+            $where['username'] = ["like", "%$username%"];
+        }
+        if(is_numeric($sex)){
+            $where['sex'] = $sex;
+        }
+        if($where){
+            $query = $query->where($where);
+            $count = Db::table('user')->where($where)->count();
+        }else{
+            $count = Db::table('user')->count();
         }
 
-
-
-        $lists = $query->fetchSql(false)->paginate($pagesize);
+        $lists = $query->fetchSql(false)->paginate($pagesize,false,['query'=>$where]);
         return ['list'=>$lists,'count'=>$count];
     }
 
@@ -242,6 +281,36 @@ class UserLogic   extends BaseLogic
         $model = new UserModel();
         $res = $model->save(['status'=>$status],['id'=>$id]);
         return $res;
+    }
+
+    /**
+     * @param $data
+     * @return array|mixed|string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function setHide($data)
+    {
+        $field = ['uid', 'is_hide'];
+        $res = $this->checkFields($field,$data);
+        if($res !== ENABLE){
+            return $res;
+        }
+        $is_hide = $data['is_hide'];
+        $uid = $data['uid'];
+        if($is_hide == "1"){
+            $is_hide = 0;
+        }else{
+            $is_hide = 1;
+        }
+        $res = (new UserLogic())->save(['is_hide'=>$is_hide],['id'=>$uid]);
+        if($res){
+            $userInfo = (new UserLogic())->getInfo(['id'=>$data['uid']]);
+            return ApiReturn::success('成功', $userInfo);
+        }else{
+            return ApiReturn::error('失败');
+        }
     }
 
 
@@ -273,10 +342,10 @@ class UserLogic   extends BaseLogic
                 return ApiReturn::error('用户名已存在');
             }
             //验证验证码
-            $check = (new MessageLogic())->checkPhoneCode($data['mobile'],$data['code']);
-            if(!$check){
-                return ApiReturn::error('验证码错误');
-            }
+//            $check = (new MessageLogic())->checkPhoneCode($data['mobile'],$data['code']);
+//            if(!$check){
+//                return ApiReturn::error('验证码错误');
+//            }
             unset($data['code']);
             //判断微信号是否存在
             $res = (new UserLogic())->getInfo(['weixin'=>$data['weixin']],false,'id');
