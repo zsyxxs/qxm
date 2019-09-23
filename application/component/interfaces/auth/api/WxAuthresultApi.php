@@ -53,7 +53,7 @@ class WxAuthresultApi extends WxAuth
         $url = 'https://api.weixin.qq.com/sns/oauth2/access_token?';
         $result = (new WxAuthvalueApi())->get_result_get($url,$config);
         $result = json_decode($result,true);
-        if( isset($result['errcode']) && $result['errcode'] == '40029'){
+        if( isset($result['errcode']) && $result['errcode']){
             return ApiReturn::error($result['errmsg']);
         }
         //拉去用户信息

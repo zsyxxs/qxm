@@ -9,6 +9,7 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="ADMIN_CSS/font.css">
     <link rel="stylesheet" href="ADMIN_CSS/xadmin.css">
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
     <style>
         .layui-elem-field {
             border: none;
@@ -70,7 +71,7 @@
                                         </a>
                                     </li>
                                     <li class="layui-col-xs2">
-                                        <a href="#" class="x-admin-backlog-body">
+                                        <a href="javascript:;" data-id="10" data-title="用户列表" data-href="{:url('user/index')}?map=yesterday" class="x-admin-backlog-body cla">
                                             <h2>昨日新增付费会员</h2>
                                             <p><cite>{$yesterday_fee_num}</cite></p>
                                         </a>
@@ -155,7 +156,7 @@
                                         </a>
                                     </li>
                                     <li class="layui-col-xs2">
-                                        <a href="#" class="x-admin-backlog-body">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
                                             <h2>随机语音红包金额（元）</h2>
                                             <p><cite>{$rand_voice_money / 100}</cite></p>
                                         </a>
@@ -172,7 +173,7 @@
                                         </a>
                                     </li>
                                     <li class="layui-col-xs2">
-                                        <a href="#" class="x-admin-backlog-body">
+                                        <a href="javascript:;" data-id="15" data-title="任务列表" data-href="{:url('task/index')}?status=1" class="x-admin-backlog-body cla">
                                             <h2>未完成任务数</h2>
                                             <p><cite>{$unfinish_task}</cite></p>
                                         </a>
@@ -190,6 +191,28 @@
     </fieldset>
 </div>
 <script>
+    var ids = [];
+    parent.element.on('tabDelete(xbs_tab)', function(data){
+        ids.splice(data.index-1, 1);
+    });
+    $(".cla").click(function () {
+        var title = $(this).data("title");
+        var id = $(this).data("id");
+        var url = $(this).data("href");
+        for(let i in ids){
+            if(ids[i]==id){
+                parent.layui.element.tabChange('xbs_tab', id);
+                return false;
+            }
+        }
+        ids.push(id);
+        parent.layui.element.tabAdd('xbs_tab', {
+            title: title
+            ,content: '<iframe tab-id="'+id+'" frameborder="0" src="'+url+'" scrolling="yes" class="x-iframe"></iframe>'
+            ,id: id
+        })
+        parent.layui.element.tabChange('xbs_tab', id);
+    })
 
 </script>
 </body>

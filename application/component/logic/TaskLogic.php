@@ -101,7 +101,7 @@ class TaskLogic  extends BaseLogic
             'id' => $t_id,
             'p_id' => $p_id,
             'uid' => $uid,
-            'status' => ENABLE
+//            'status' => ENABLE    //去掉是否完成任务的条件
         ];
         $taskInfo = (new TaskLogic())->getInfo($map);
         if(empty($taskInfo)){
@@ -148,6 +148,11 @@ class TaskLogic  extends BaseLogic
                 (new UserLogic())->save($map,['id' =>$uid]);
             }
 
+            //给用户发送模板消息
+            $url = config('webUrl.h5Url');
+            $appid = config('wxUrl.appid');
+//            $res = (new TemplateLogic())->sendDynamicTemplate($taskInfo['uid'],$url,$appid,$uid,$t_id);
+
             Db::commit();
             return ApiReturn::success('评价成功');
         }catch(\Exception $e){
@@ -183,13 +188,16 @@ class TaskLogic  extends BaseLogic
             }elseif ($status == 2){
                 $query = $query->where('t.status',1);
             }
-
         }
 
         $lists = $query->fetchSql(false)->paginate($pagesize);
 
-        $count = Db::table('task')->count();
-
+        if(!empty($status)){
+            $status = $status -1;
+            $count = Db::table('task')->where('status',$status)->count();
+        }else{
+            $count = Db::table('task')->count();
+        }
         return ['list'=>$lists,'count'=>$count];
     }
 
@@ -370,10 +378,12 @@ class TaskLogic  extends BaseLogic
         $pageNo = $data['pageNo'];
         $pagesize = $data['pagesize'];
         $type = $data['type'];
-
-        $list = $this->getTaskList($uid,$type,$pageNo,$pagesize);
-        return $list;
-
+        if(is_numeric($uid) && $uid){
+            $list = $this->getTaskList($uid,$type,$pageNo,$pagesize);
+            return $list;
+        }else{
+            return ApiReturn::success('成功',array());
+        }
     }
 
     /**
@@ -406,7 +416,7 @@ class TaskLogic  extends BaseLogic
                 $map = ['two'=>$uid];
                 $query->where($map);
             })->whereOr(function ($query) use ($uid) {
-                $map = ['three'=>$uid,'assess' => 0];
+                $map = ['three'=>$uid];
                 $query->where($map);
             });
         }
@@ -421,7 +431,8 @@ class TaskLogic  extends BaseLogic
             $pInfo = (new UserLogic())->getInfo(['id' => $v['p_id']],false,'id,username,logo,level');
             $uInfo = (new UserLogic())->getInfo(['id' => $v['uid']],false,'id,username,logo,level');
             $visitor = explode(',',$v['visitor_ids']);
-            $vInfo = (new UserLogic())->getLists(['id' => array('in',$visitor)],false,'id,username,logo,level');
+            $order = "field(id, ".$v['visitor_ids'].")";
+            $vInfo = (new UserLogic())->getLists(['id' => array('in',$visitor)],$order,'id,username,logo,level');
             $list[$k]['pInfo'] = $pInfo;
             $list[$k]['uInfo'] = $uInfo;
             $list[$k]['vInfo'] = $vInfo;
@@ -604,6 +615,38 @@ class TaskLogic  extends BaseLogic
     }
 
     /**
+     * 手动生成一级任务
+     * @param $uid
+     * @param $flag_user
+     * @param $flag_like
+     * @param $type
+     * @return bool
+     */
+    public function manual_create_task($uid)
+    {
+        $userInfo = (new UserLogic())->getInfo(['id' => $uid]);
+        if($userInfo && $userInfo['status'] == 0){
+            return ApiReturn::error('该用户已被禁用');
+        }
+        if($userInfo['level']!=1){
+            return ApiReturn::error('只为1级用户生成任务卡');
+        }
+
+        $taskInfo = (new TaskLogic())->getInfo(['uid'=>$uid],false,'id');
+        if($taskInfo && $taskInfo['id']){
+            return ApiReturn::error('该用户已生成过任务卡');
+        }
+        $flag_like = explode(",", $userInfo['flag_like']);
+        $flag_user = explode(",", $userInfo['flag_user']);
+        $res = (new TaskLogic())->create_task($userInfo, $flag_user, $flag_like, 1);
+        if($res) {
+            return ApiReturn::success('成功');
+        }else{
+            return ApiReturn::error('失败');
+        }
+    }
+
+    /**
      * 添加标签时生成一级任务或者升级时匹配三个用户
      * @param $uid
      * @param $flag_user
@@ -689,11 +732,11 @@ class TaskLogic  extends BaseLogic
 
             }
 
-
-
             $visitor_ids_str = implode(',',$visitor_ids);
 //                        $visitor_ids_str = '42,43,44';
 
+            $url = config('webUrl.h5Url');
+            $appid = config('wxUrl.appid');
             if($type == 1){
                 //生成任务和佣金记录
                 //获取用户的上级信息
@@ -729,8 +772,6 @@ class TaskLogic  extends BaseLogic
                 //1：选择完标签给上级发送
                 //2：任务点赞发布语音动态
                 $uid = $userInfo['id'];
-                $url = config('webUrl.h5Url');
-                $appid = config('wxUrl.appid');
                 (new TemplateLogic())->sendTaskTemplate($uid,$url,$appid);
 
             }else{
@@ -749,6 +790,7 @@ class TaskLogic  extends BaseLogic
                 (new TaskLogic())->getInsertId($data);
 
             }
+            (new TemplateLogic())->sendFlagsTemplate($visitor_ids, $url, $appid, $userInfo['username']);
             Db::commit();
             return true;
         }catch (\Exception $e){

@@ -14,6 +14,8 @@
     <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
     <script type="text/javascript" src="ADMIN_LIB/layui/layui.js" charset="utf-8"></script>
     <script type="text/javascript" src="ADMIN_JS/xadmin.js"></script>
+
+    <script src="ADMIN_JS/BenzAMRRecorder.js"></script>
     <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
     <!--[if lt IE 9]>
     <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
@@ -73,13 +75,10 @@
                 </video>
                 {/volist}
                 {/eq}
-
+                {php}$ext = substr($v['voice'], -3);{/php}
                 {notempty name='v.voice'}
-                <object height="50" width="90%" data="{$v.voice}"></object>
+                {if condition="$ext eq 'amr'"}<button class="layui-btn playamr" data-id="{$v.id}" data-content="{$v.voice}">播放</button>{else/}<object height="50" width="90%" data="{$v.voice}"></object>{/if}
                 {/notempty}
-
-
-
 
             </td>
 
@@ -108,6 +107,33 @@
 
 
 </div>
+
+
+<script type="text/javascript">
+    var amr;
+    $(".playamr").click(function () {
+        if(amr){
+            amr.stop();
+        }
+        var txt = $(this).text();
+        if(txt=='停止') {
+            $(this).text("播放");
+            return false;
+        }
+        var id = $(this).data('id');
+        $(".playamr").each(function () {
+            if($(this).data('id')!=id){
+                $(this).text(txt);
+            }
+        })
+        $(this).text("停止");
+        amr = new BenzAMRRecorder();
+        amr.initWithUrl($(this).data("content")).then(function() {
+            amr.play();
+        })
+    })
+
+</script>
 <script>
     //批量排序
     $('.allsort').click(function () {

@@ -129,6 +129,8 @@ class UserLogic   extends BaseLogic
         //判断当前用户是否已经注册
         $res = (new UserLogic())->getInfo(['unionid' => $data['unionid']]);
         if($res){
+            //插入登录日志，获取最新token
+            $res['token'] = (new UserLoginLogLogic())->save(['uid'=>$res['id'], 'ip'=>request()->ip()]);
             return ApiReturn::success('已经注册',$res);
         }
         //注册信息
@@ -137,6 +139,8 @@ class UserLogic   extends BaseLogic
             return ApiReturn::error('授权失败，请重新授权');
         }
         $userInfo = $this->getInfo(['unionid' => $data['unionid']]);
+        //插入登录日志，获取最新token
+        $userInfo['token'] = (new UserLoginLogLogic())->save(['uid'=>$userInfo['id'], 'ip'=>request()->ip()]);
         return ApiReturn::success('授权成功',$userInfo);
 
 
@@ -184,6 +188,8 @@ class UserLogic   extends BaseLogic
         if(empty($userInfo)){
             return ApiReturn::error('用户名信息不存在');
         }
+        //刷新登录日志，获取最新token
+        $userInfo['token'] = (new UserLoginLogLogic())->save(['uid'=>$userInfo['id'], 'ip'=>request()->ip()], 1);
         //用户信息存在
         return ApiReturn::success('登录成功',$userInfo);
     }
@@ -242,7 +248,7 @@ class UserLogic   extends BaseLogic
      * @return array
      * @throws \think\exception\DbException
      */
-    public function getUserListss($pagesize,$username,$sex='')
+    public function getUserListss($pagesize,$username,$map='')
     {
         $order = 'create_time desc';
         $query = Db::table('user')
@@ -251,8 +257,10 @@ class UserLogic   extends BaseLogic
         if(!empty($username) && $username){
             $where['username'] = ["like", "%$username%"];
         }
-        if(is_numeric($sex)){
-            $where['sex'] = $sex;
+        if(is_array($map)){
+            $where = $where ? array_merge($where, $map) : $map;
+        }else if(is_numeric($map)){
+            $where['sex'] = $map;
         }
         if($where){
             $query = $query->where($where);
@@ -262,6 +270,23 @@ class UserLogic   extends BaseLogic
         }
 
         $lists = $query->fetchSql(false)->paginate($pagesize,false,['query'=>$where]);
+        return ['list'=>$lists,'count'=>$count];
+    }
+
+    public function getULists($pagesize,$map=[],$mapTime=[],$join=[]){
+        $query = Db::table('user')->where($map);
+        $queryCount = Db::table('user')->where($map);
+        if($join){
+            $query = $query->alias('u')->join($join[0], $join[1], $join[2]);
+            $queryCount = $queryCount->alias('u')->join($join[0], $join[1], $join[2]);
+        }
+        if($mapTime){
+            $query = $query->where($mapTime[0],$mapTime[1],$mapTime[2]);
+            $queryCount = $queryCount->where($mapTime[0],$mapTime[1],$mapTime[2]);
+        }
+        $count = $queryCount->count('u.id');
+
+        $lists = $query->fetchSql(false)->paginate($pagesize);
         return ['list'=>$lists,'count'=>$count];
     }
 
@@ -540,6 +565,9 @@ class UserLogic   extends BaseLogic
         }
         $uid = $data['uid'];
         $userInfo = (new UserLogic())->getInfo(['id'=>$uid]);
+        if(!isset($userInfo['id'])){
+            return ApiReturn::success('成功', array());
+        }
         //获取用户的标签信息
         $flag_user = explode(',',$userInfo['flag_user']);
         $flag_like = explode(',',$userInfo['flag_like']);
@@ -554,7 +582,7 @@ class UserLogic   extends BaseLogic
             't.status' => 1,
             't.type' => 1,
             't.assess' => array('gt',0),
-            'home_page' => 1
+//            'home_page' => 1
             ];
         $order = 't.home_page desc,t.update_time desc';
         $assess = Db::table('task')->alias('t')
@@ -564,6 +592,7 @@ class UserLogic   extends BaseLogic
             ->field('t.id,t.assess,t.assess_content,t.home_page,u.username,u.logo')
             ->find();
         $userInfo['assess'] = $assess;
+        $userInfo['voice_info'] = Db::table('task')->where("voice", 'neq', 0)->where(['uid'=>$uid])->field('voice, length')->find();
         //获取用户的最新的一条朋友圈
         $dynamic = Db::table('dynamic')
             ->where(['p_id' => 0,'uid'=>$uid,'status'=>1])
@@ -580,8 +609,9 @@ class UserLogic   extends BaseLogic
             ];
             $arr_imgs = (new ImgLogic())->getLists($map,false,'id,url,status');
         }
-        $dynamic['arr_imgs'] = $arr_imgs;
+        if($dynamic) $dynamic['arr_imgs'] = $arr_imgs;
         $userInfo['dynamic'] = $dynamic;
+
 
         return ApiReturn::success('success',$userInfo);
 

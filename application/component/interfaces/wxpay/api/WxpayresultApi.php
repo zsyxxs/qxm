@@ -96,7 +96,6 @@ class WxpayresultApi extends WxpayUrl
 
                         //判断上级的上级的等级以及下线人数，以及是否需要发放二级佣金
                         $grandInfo = (new UserLogic())->getInfo(['id'=>$parentInfo['p_id']],false,'id,p_id,level,level_one,level_two');
-dump($grandInfo);
                         //判断该当前用户二级下线是否达到升级标准
                         $grand_level = '';
                         if($grandInfo['level_two'] == 2 && $grandInfo['level'] < 4){
@@ -189,6 +188,160 @@ dump($grandInfo);
 
 
 
+    }
+
+    //微信统一下单查询接口
+    public  function order_query($order_num){
+        $post['appid'] = $this->appId;  //公众号id
+        $post['mch_id'] = $this->mchId;  //商户id
+        $post['nonce_str'] = (new WxpayvalueApi())->randomkeys(32); //随机字符串
+        $post['out_trade_no'] = $order_num;
+        $post['sign'] = (new WxpayvalueApi)->MakeSign($post, $this->key);//签名
+        $post_xml = (new WxpayvalueApi)->arrayToXml($post);
+        $xml = (new WxpayvalueApi)->http_request($this->queryUrl, $post_xml);     //POST方式请求http
+        $data = (new WxpayvalueApi)->XMLDataParse($xml);               //将【统一下单】api返回xml数据转换成数组，全要大写
+
+        if($data['result_code'] == 'SUCCESS' && $data['return_msg'] == 'OK'){
+            Db::startTrans();
+            try{
+                //订单号
+                $order_num = isset($data['out_trade_no']) && !empty($data['out_trade_no']) ? $data['out_trade_no'] : 0;
+                //如果订单存在，且状态为1，直接返回
+                $orderInfo = (new OrderLogic())->getInfo(['order_num' => $order_num]);
+                if($orderInfo && $orderInfo['status']==1){
+                    return 'OK';
+                }
+                //如果订单存在，且状态为0
+                if($orderInfo && $orderInfo['status'] == 0){
+                    //更新订单的支付状态为支付成功
+                    (new OrderLogic())->save(['status' => 1],['id'=>$orderInfo['id']]);
+//                  $orderInfo = (new OrderLogic())->getInfo(['id' => $order_id]);
+                    $uid = $orderInfo['uid'];
+                    //获取当前用户的信息
+                    $userInfo = (new UserLogic())->getInfo(['id' => $uid]);
+
+
+
+                    //判断当前付费目的
+                    if($userInfo['level'] == 0){
+                        //普通会员升级为一级会员
+                        //根据填写的邀请码获取上级id
+                        $parentInfo = (new UserLogic())->getInfo(['code' => $userInfo['invite_code']],false,'id,p_id,level,level_one,level_two');
+
+                        //更新用户信息
+                        //用户升级到一级,绑定上级id
+                        $level = $userInfo['level'] + 1;
+                        (new UserLogic())->save(['level' => $level,'p_id'=>$parentInfo['id']],['id' => $uid]);
+
+
+
+                        //判断该用户上级等级以及下线人数
+//                        $parentInfo = (new UserLogic())->getInfo(['id'=>$userInfo['p_id']],false,'id,level,level_one,level_two');
+                        $level = '';
+                        if($parentInfo['level_one'] == 2 && $parentInfo['level'] < 3){
+                            $level = 3;
+                        }elseif ($parentInfo['level_one'] == 14 && $parentInfo['level'] < 5){
+                            $level = 5;
+                        }elseif ($parentInfo['level_one'] == 149 && $parentInfo['level'] < 6){
+                            $level = 6;
+                        }
+                        $level_one = $parentInfo['level_one'] + 1;
+                        if(!empty($level)){
+                            //更新上级用户信息
+                            (new UserLogic())->save(['level' => $level,'level_one'=>$level_one],['id'=>$parentInfo['id']]);
+                        }else{
+                            (new UserLogic())->save(['level_one'=>$level_one],['id'=>$parentInfo['id']]);
+                        }
+
+
+
+                        //判断上级的上级的等级以及下线人数，以及是否需要发放二级佣金
+                        $grandInfo = (new UserLogic())->getInfo(['id'=>$parentInfo['p_id']],false,'id,p_id,level,level_one,level_two');
+                        //判断该当前用户二级下线是否达到升级标准
+                        $grand_level = '';
+                        if($grandInfo['level_two'] == 2 && $grandInfo['level'] < 4){
+                            $grand_level = 4;
+                        }
+                        $level_two = $grandInfo['level_two'] + 1;
+                        //增加用户的二级下线人数
+                        if(!empty($grand_level)){
+                            (new UserLogic())->save(['level' => $grand_level,'level_two' => $level_two],['id'=>$grandInfo['id']]);
+                        }else{
+                            (new UserLogic())->save(['level_two' => $level_two],['id'=>$grandInfo['id']]);
+                        }
+
+
+
+                        //判断要不要给该用户发放二级佣金
+                        if($grandInfo['level_two'] < 2){
+                            //为上级的上级生成一条待发放二级佣金记录
+                            (new QxCommissionLogic())->save([
+                                'uid' => $grandInfo['id'],
+                                'money' => LEVEL_TWO_MONEY,
+                                'q_uid' => $uid,
+                                'status' => 0
+                            ]);
+                        }
+
+
+//                        //二级下线数量达到发放之前的待发放佣金
+                        if($grandInfo['level_two'] == 2){
+                            //生成一个待发放的佣金记录
+                            (new QxCommissionLogic())->save([
+                                'uid' => $grandInfo['id'],
+                                'money' => LEVEL_TWO_MONEY,
+                                'q_uid' => $uid,
+                                'status' => 0
+                            ]);
+
+                            //发放之前的待发放的二级佣金
+                            //获取该用户之前待发放的佣金记录
+                            $list = (new QxCommissionLogic())->getLists(['uid' => $grandInfo['id'],'status'=>0]);
+                            if(!empty($list)){
+                                foreach ($list as $v){
+                                    //将记录更改为已发放，将佣金加入到用户余额
+                                    (new QxCommissionLogic())->save(['status'=>1 ],['id'=>$v['id']]);
+                                    (new UserLogic())->setInc(['id'=>$v['uid']],'money',$v['money']);
+                                }
+                            }
+                        }
+
+
+                        //二级下线人数符合，直接发放二级下线佣金
+                        if($grandInfo['level_two'] > 2){
+                            (new UserLogic())->setInc(['id'=>$grandInfo['id']],'money',LEVEL_TWO_MONEY);
+
+                            //为上级的上级添加一条牵线佣金获得记录
+                            (new QxCommissionLogic())->save([
+                                'uid' => $grandInfo['id'],
+                                'money' => LEVEL_TWO_MONEY,
+                                'q_uid' => $uid
+                            ]);
+                        }
+
+                    }elseif ($userInfo['level'] >=2 && $userInfo['level'] <= 4){
+                        //用户通过付费直接升级到五级
+                        //更新付费用户信息
+                        $level = 5;
+                        (new UserLogic())->save(['level' => $level],['id' => $uid]);
+
+                    }elseif ($userInfo['level'] == 5){
+                        //每次用户付费在原有基础上升级一级
+                        $level = $userInfo['level'] + 1;
+                        (new UserLogic())->save(['level' => $level],['id' => $uid]);
+
+                    }
+
+                }
+
+                Db::commit();
+                return 'OK';
+            }catch (\Exception $e){
+                Db::rollback();
+            }
+        }else{
+            return 'fail';
+        }
     }
 
 

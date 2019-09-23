@@ -48,7 +48,7 @@ function code($text,$logo = ''){
         $from_width = ($QR_width - $logo_qr_width) / 2;
         imagecopyresampled($QR, $logo, $from_width, $from_width, 0, 0, $logo_qr_width, $logo_qr_height, 1, 1);
         imagepng($QR,$filename);
-
+        imagedestroy($QR);
     }
 
     $saveName = str_replace('public/','',$saveName);

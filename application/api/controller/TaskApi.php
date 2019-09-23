@@ -12,6 +12,7 @@ namespace app\api\controller;
 
 use app\component\logic\DynamicLogic;
 use app\component\logic\TaskLogic;
+use app\component\logic\TemplateLogic;
 use app\component\logic\UserLogic;
 use app\component\logic\VoiceCommissionLogic;
 
@@ -93,6 +94,19 @@ class TaskApi extends BaseApi
     }
 
     /**
+     * 手动生成任务卡
+     * @param  uid
+     * @return array|mixed|string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function create_flags_task(){
+        $uid = input("param.uid");
+        return (new TaskLogic())->manual_create_task($uid);
+    }
+
+    /**
      * 手动推送任务
      * @return array|mixed|string
      * @throws \think\db\exception\DataNotFoundException
@@ -114,6 +128,31 @@ class TaskApi extends BaseApi
                 'cate' => 1,
             ];
             return (new DynamicLogic())->save($data, $map);
+        }
+    }
+
+    /**
+     * 手动推送给三位匹配用户
+     * @return array|mixed|string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function send_three(){
+        $url = config('webUrl.h5Url');
+        $appid = config('wxUrl.appid');
+        $uid = input("param.uid");
+        $t_id = input("param.t_id");
+        $types = input("param.types");
+        $uid= $uid ? $uid : 8;
+        $t_id= $t_id ? $t_id : 23;
+        $types = $types ? $types : 3;
+        if($types==1){
+            print_r((new TemplateLogic())->sendFlagsTemplate([8,7,6], $url, $appid, '小奶音'));
+        }else if($types==2){
+            print_r((new TemplateLogic())->sendAssessTemplate(8, $url, $appid, '小奶音'));
+        }else if($types==3){
+            print_r((new  TemplateLogic())->sendAssessDynamicTemplate($uid, $url, $appid, $t_id));
         }
     }
 

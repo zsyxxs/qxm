@@ -28,13 +28,19 @@ class User extends BaseAdmin
     {
         $username = $this->_param('username','');
         $sex = $this->_param('sex','');
-
-
+        $map = $this->_param('map','');
         $pagesize = 20;
         //根据用户信息，获取对应的权限列表
         $logic = new UserLogic();
-        $userLists = $logic->getUserListss($pagesize,$username,$sex);
-//        dump($userLists);
+        if($map){
+            if($map=='yesterday'){
+                $start_time = strtotime("-1 day", strtotime(date("Y-m-d")));
+                $endtime = strtotime("-1 day", strtotime(date("Y-m-d").' 23:59:59'));
+                $userLists = $logic->getULists($pagesize,['o.status'=>1],['o.update_time','between',[$start_time, $endtime]],['order o', 'o.uid=u.id', 'left']);
+            }
+        }else{
+            $userLists = $logic->getUserListss($pagesize,$username,$map);
+        }
 
         $count = $userLists['count'];
         $page = $userLists['list']->render();

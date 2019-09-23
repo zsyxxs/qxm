@@ -36,6 +36,41 @@ class WeixinApi extends BaseApi
         }
     }
 
+
+    /**
+     * 微信预支付订单
+     * @param $order_num
+     * @return array|mixed|string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function queryorder(){
+        $data = $_REQUEST;
+        $fields = ['order_num'];
+        $res = (new BaseLogic())->checkFields($fields,$data);
+        if($res !== ENABLE){
+            return $res;
+        }
+        $order_num = $data['order_num'];
+        //判断订单是否存在
+        $orderInfo = (new OrderLogic())->getInfo(['order_num'=>$order_num]);
+        if(empty($orderInfo)){
+            return ApiReturn::error('订单号错误');
+        }
+        //判断用户是否存在
+        $userInfo = (new UserLogic())->getInfo(['id'=>$orderInfo['uid']]);
+        if(empty($userInfo)){
+            return ApiReturn::error('用户不存在');
+        }
+        $res = (new WxpayresultApi())->order_query($order_num);
+        if($res=='OK'){
+            return ApiReturn::success($res);
+        }else{
+            return ApiReturn::error($res);
+        }
+    }
+
     /**
      * 微信预支付订单
      * @param $data

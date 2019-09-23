@@ -53,7 +53,7 @@ class Index extends BaseAdmin
         $this->assign('total_free_num',$total_free_num);
 
         //未完成任务数
-        $unfinish_task = (new TaskLogic())->count(['assess'=>0,'type'=>1]);
+        $unfinish_task = (new TaskLogic())->count(['status'=>0]);
 //        dump($unfinish_task);
         $this->assign('unfinish_task',$unfinish_task);
 

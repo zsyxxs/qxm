@@ -68,6 +68,7 @@
 
             <th>加入时间</th>
             <th>是否禁用</th>
+            <th>是否隐身</th>
             <th>操作</th>
         </thead>
         <tbody>
@@ -110,6 +111,7 @@
                 </button>
                 {/eq}
             </td>
+            <td>{$v.is_hide ? '是' : '否'}</td>
             <td class="td-manage">
                 <a title="编辑"  onclick="x_admin_show('编辑','edit/?id={$v.id}',600,400)" href="javascript:;">
                     <i class="layui-icon">&#xe642;</i>

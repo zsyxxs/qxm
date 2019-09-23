@@ -20,6 +20,7 @@ class WxpayUrl extends Controller
     protected $transfersUrl;
     protected $apiUrl;
     protected $refundUrl;
+    protected $queryUrl;
 
 
     public function _initialize()
@@ -31,6 +32,7 @@ class WxpayUrl extends Controller
         $this->apiUrl = config('webUrl.apiUrl');
         $this->unifiedorderUrl = config('wxPay.unifiedorderUrl');
         $this->transfersUrl = config('wxPay.transfersUrl');
+        $this->queryUrl = config('wxPay.queryUrl');
         $this->refundUrl = config('wxPay.refundUrl');
     }
 }

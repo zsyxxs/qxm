@@ -44,21 +44,42 @@ class WxresultApi extends WxUrl
         //$mediaId 微信语音mediaId（前端传递过来）
         //微信access_token（这个参数获取省略，不难，自己获取）
         $access_token = $this->get_access_token();
-        $path = "./uploads/voice/amr";   //保存路径，相对当前文件的路径
-        //微信上传下载媒体文件
-//        $url = "http://file.api.weixin.qq.com/cgi-bin/media/get?access_token={$access_token}&media_id={$mediaId}";
-        $url = "https://api.weixin.qq.com/cgi-bin/media/get?access_token={$access_token}&media_id={$mediaId}";
-        //文件名称
-        $filename = "wxupload_".date('Ymd').time().rand(1111,9999).".amr";
-        //下载微信语音并保存
-        $this->downAndSaveFile($url,$path."/".$filename);
-
-        //要转换的amr文件地址
-        $armFile = "/uploads/voice/amr/".$filename;
 //        $mode = 1; //将amr格式转换为MP3格式
 //        $mode = 2; //将amr格式转换为wav格式
-        $mode = 3; //原始amr 文件
-        if($mode==1){
+//        $mode = 3; //原始amr 文件
+        $mode = 4; //将原始speex格式转为wav格式
+        if($mode!=4){
+            $path = "./uploads/voice/amr";   //保存路径，相对当前文件的路径
+            //微信上传下载媒体文件
+            $url = "https://api.weixin.qq.com/cgi-bin/media/get?access_token={$access_token}&media_id={$mediaId}";
+            //文件名称
+            $filename = "wxupload_".date('Ymd').time().rand(1111,9999).".amr";
+            //下载微信语音并保存
+            $this->downAndSaveFile($url,$path."/".$filename);
+
+            //要转换的amr文件地址
+            $armFile = "/uploads/voice/amr/".$filename;
+        }else{
+            $path = "./uploads/voice/speex";   //保存路径，相对当前文件的路径
+            $url = "https://api.weixin.qq.com/cgi-bin/media/get/jssdk?access_token={$access_token}&media_id={$mediaId}";
+            //文件名称
+            $filename = "wxupload_".date('Ymd').time().rand(1111,9999).".speex";
+            //下载微信语音并保存
+            $this->downAndSaveFile($url,$path."/".$filename);
+
+            //要转换的amr文件地址
+            $speexFile = "/uploads/voice/speex/".$filename;
+        }
+        if($mode==4){
+            //转换后的WAV文件保存的文件名
+            $wavFilename = "wxupload_".date('Ymd').time().rand(1111,9999).".wav";
+            //转换后的MP3文件保存的路径
+            $wavFile = "/uploads/voice/wav/".$wavFilename;
+            $this->speexTransCodingWav($speexFile, $wavFile);
+
+            //上传到oss
+            $res = $this->uploadFile($wavFilename, $wavFile);
+        }else if($mode==1){
             //转换后的MP3文件保存的文件名
             $mp3Filename = "wxupload_".date('Ymd').time().rand(1111,9999).".mp3";
             //转换后的MP3文件保存的路径
@@ -108,6 +129,14 @@ class WxresultApi extends WxUrl
     {
         $dir = $_SERVER['DOCUMENT_ROOT'];
         exec("ffmpeg -i ".$dir.$armFile." ".$dir.$wavFile);
+        return $wavFile;
+    }
+
+    //将微信语音speex格式转换为WAV格式
+    public function speexTransCodingWav($armFile, $wavFile)
+    {
+        $dir = $_SERVER['DOCUMENT_ROOT'];
+        exec("speex2wav ".$dir.$armFile." ".$dir.$wavFile);
         return $wavFile;
     }
 

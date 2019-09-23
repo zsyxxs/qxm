@@ -61,15 +61,18 @@ class DynamicLogic  extends BaseLogic
             //对评论进行评论
             $field = ['uid','type','p_id','c_uid'];
         }
-
         $res = $this->checkFields($field,$data);
         if($res !== ENABLE){
             return $res;
         }
+
         //判断用户是否可用发布动态
-        $userInfo = (new UserLogic())->getInfo(['id'=>$data['uid']],false,'id,status,complain_num,level');
+        $userInfo = (new UserLogic())->getInfo(['id'=>$data['uid']],false,'id,status,complain_num,level,has_send_flag');
         if($userInfo['level'] < 1 || $userInfo['status'] != 1 || $userInfo['complain_num'] >=3){
             return ApiReturn::error('该用户不可发布动态');
+        }
+        if($userInfo['has_send_flag']<1){
+            return ApiReturn::error('该用户不可重复发送标签动态');
         }
         //内容和图片必须有一个
         if(empty($data['content']) && empty($data['imgs'])){
@@ -78,6 +81,21 @@ class DynamicLogic  extends BaseLogic
 //        $res = (new DynamicLogic())->save($data);
         $id = (new DynamicLogic())->getInsertId($data);
         if($res){
+            if($data['type']==6){
+                (new UserLogic())->save(['has_send_flag'=>0],['id'=>$userInfo['id']]);
+            }
+            //当用户评论时
+            if($data['cate'] == 2){
+                $comm = (new DynamicLogic())->column('id', ['p_id'=>$data['p_id'], 'cate'=>2]);
+                if(count($comm)==1){
+                    $dynamic = (new DynamicLogic())->getInfo(['id'=>$data['p_id'], 'cate'=>1],false,'id, uid');
+                    if($dynamic['uid']){
+                        $url = config('webUrl.h5Url');
+                        $appid = config('wxUrl.appid');
+                        (new TemplateLogic())->sendAssessDynamicTemplate($dynamic['uid'], $url, $appid, $dynamic['id']);
+                    }
+                }
+            }
             return ApiReturn::success('添加成功',$id);
         }else{
             return ApiReturn::error('添加失败');
@@ -240,7 +258,7 @@ class DynamicLogic  extends BaseLogic
         $info = Db::table('dynamic')->alias('d')
             ->join('user u','d.uid=u.id')
             ->where('d.id',$id)
-            ->field('d.id,d.uid,d.p_id,d.c_uid,d.content,d.voice,d.length,d.imgs,d.type,d.cate,d.stick,d.point_ids,d.status,d.create_time,u.username,u.logo,u.level')
+            ->field('d.id,d.uid,d.p_id,d.c_uid,d.content,d.voice,d.length,d.imgs,d.type,d.cate,d.stick,d.point_ids,d.status,d.create_time,u.username,u.logo,u.level,u.is_hide,u.flag_user,u.flag_like')
             ->find();
         //获取对应的点评论
         //判断是否有图片
@@ -256,7 +274,7 @@ class DynamicLogic  extends BaseLogic
         $comments = Db::table('dynamic')->alias('d')
             ->join('user u','d.uid = u.id')
             ->where($where)
-            ->field('d.id,d.uid,d.p_id,d.c_uid,d.content,d.voice,d.length,d.imgs,d.type,d.cate,d.stick,d.point_ids,d.status,d.create_time,u.username')
+            ->field('d.id,d.uid,d.p_id,d.c_uid,d.content,d.voice,d.length,d.imgs,d.type,d.cate,d.stick,d.point_ids,d.status,d.create_time,u.username,u.is_hide,u.flag_user,u.flag_like')
             ->select();
 
         $info['comments'] = $comments;
@@ -273,7 +291,7 @@ class DynamicLogic  extends BaseLogic
         if(!empty($info['point_ids'])){
             $point_ids = explode(',',$info['point_ids']);
             foreach ($point_ids as $v){
-                $userInfo = (new UserLogic())->getInfo(['id'=>$v],false,'id,username,level');
+                $userInfo = (new UserLogic())->getInfo(['id'=>$v],false,'id,username,level,is_hide,flag_user,flag_like');
                 array_push($point_info,$userInfo);
             }
         }

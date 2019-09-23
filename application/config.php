@@ -167,7 +167,7 @@ return [
 
     'log'                    => [
         // 日志记录方式，内置 file socket 支持扩展
-        'type'  => 'File',
+        'type'  => 'test',
         // 日志保存目录
         'path'  => LOG_PATH,
         // 日志记录级别
@@ -242,8 +242,8 @@ return [
 
     'webUrl' => [
 //        'baseUrl' => 'http://mingpian.8raw.com',
-        'h5Url'  => 'http://h5.raydonet.com',
-        'apiUrl'  => 'http://h52.raydonet.com'
+        'h5Url'  => 'http://h5.qxmiao.com',
+        'apiUrl'  => 'http://api.qxmiao.com'
     ],
 
     //阿里云oss配置
@@ -269,6 +269,7 @@ return [
         'unifiedorderUrl' => 'https://api.mch.weixin.qq.com/pay/unifiedorder',
         'transfersUrl' => 'https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers',//商户向个人付款url
         'refundUrl' => 'https://api.mch.weixin.qq.com/secapi/pay/refund',//申请退款url
+        'queryUrl' => 'https://api.mch.weixin.qq.com/pay/orderquery',//查询订单url
     ],
     //微信公众平台配置（牵线喵）
     'wxUrl' => [

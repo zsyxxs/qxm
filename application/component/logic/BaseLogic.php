@@ -36,9 +36,13 @@ class BaseLogic
      * @param $field
      * @return mixed
      */
-    public function sum($map,$field)
+    public function sum($map,$field,$order=false)
     {
-        return $this->model->where($map)->sum($field);
+        if($order===false){
+            return $this->model->where($map)->sum($field);
+        }else{
+            return $this->model->where($map)->order($order)->sum($field);
+        }
     }
 
     /**
@@ -242,7 +246,11 @@ class BaseLogic
         $query = $this->model;
 
         if (false !== $order) {
-            $query = $query->order($order);
+            if(substr($order,0,5)=='field'){
+                $query = $query->orderRaw($order);
+            }else{
+                $query = $query->order($order);
+            }
         }
 
         if (false !== $field) {

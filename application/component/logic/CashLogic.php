@@ -53,8 +53,17 @@ class CashLogic  extends BaseLogic
         $res = (new UserLogic())->getInfo(['id'=>$uid]);
         //获取该用户申请的提现总额
         $result = (new CashLogic())->getSumByuid($uid);
-        //可提现总金额
-        $allow_cash = $total_cash  - $result ;
+
+        $date_zero = strtotime(date("Y-m-d"));
+        //今日牵线红包
+        $qx_cash_day = Db::table('qx_commission')->where(['uid' => $uid,'status' => 1])->whereTime('create_time', 'd')->sum('money');
+        //今日任务红包
+        $task_cash_day = Db::table('commission')->where(['uid' => $uid,'status' => 1])->whereTime('create_time', 'd')->sum('money');
+        //今日语音红包
+        $voice_cash_day = Db::table('voice_commission')->where(['uid' => $uid,'status' => 1])->whereTime('create_time', 'd')->sum('money');
+
+        //今日收入
+        $allow_cash = $qx_cash_day  + $task_cash_day + $voice_cash_day;
 
         $shuju = [
             'total_cash' => $total_cash,    //总收入
